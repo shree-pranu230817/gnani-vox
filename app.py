@@ -171,7 +171,26 @@ def create_app():
 
     return app
 
+class VercelPathFixerMiddleware:
+    def __init__(self, wsgi_app):
+        self.wsgi_app = wsgi_app
+
+    def __call__(self, environ, start_response):
+        original_path = (
+            environ.get('HTTP_X_FORWARDED_URI') or
+            environ.get('HTTP_X_MATCHED_PATH') or
+            environ.get('HTTP_X_NOW_ROUTE')
+        )
+        if original_path:
+            path_only = original_path.split('?')[0]
+            environ['PATH_INFO'] = path_only
+        elif environ.get('PATH_INFO') in ('/api/index', '/api', '/api/index.py', ''):
+            environ['PATH_INFO'] = '/'
+
+        return self.wsgi_app(environ, start_response)
+
 app = create_app()
+app.wsgi_app = VercelPathFixerMiddleware(app.wsgi_app)
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))

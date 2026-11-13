@@ -5,15 +5,15 @@
         "templates/**",
         "static/**",
         "api/templates/**",
-        "api/static/**"
+        "api/static/**",
+        "public/**"
       ]
     }
   },
   "rewrites": [
     {
-      "source": "/((?!static/|css/|js/|images/).*)",
+      "source": "/(.*)",
       "destination": "/api/index"
     }
   ]
 }
-
