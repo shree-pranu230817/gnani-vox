@@ -1,0 +1,169 @@
+{% extends 'base.html' %}
+
+{% block title %}About GNANI VOX – AI-Powered Multilingual Voice Platform{% endblock %}
+
+{% block content %}
+<div class="screen-wrapper">
+    <div class="container">
+        <!-- Breadcrumb -->
+        <div style="margin-bottom: 20px;">
+            <a href="{{ url_for('index') }}" style="font-weight: 700; color: var(--primary-green); display: inline-flex; align-items: center; gap: 6px;">
+                ← Back to Home
+            </a>
+        </div>
+
+        <!-- ABOUT HERO -->
+        <div class="screen-card-box" style="margin-bottom: 28px; background: linear-gradient(135deg, #0d2137 0%, #14532d 100%); color: #fff; padding: 40px 36px; border-radius: 18px;">
+            <div style="display: flex; align-items: center; gap: 20px; flex-wrap: wrap;">
+                <img src="{{ url_for('static', filename='images/gnani_vox_logo.png') }}" alt="GNANI VOX Logo" style="height: 72px; border-radius: 12px;">
+                <div>
+                    <h1 style="font-size: 2rem; color: #fff; margin-bottom: 6px;">GNANI VOX</h1>
+                    <p style="color: #a7f3d0; font-size: 1.05rem; margin: 0 0 4px;">One Voice. Many Languages. No Barriers.</p>
+                    <p style="color: #bfdbfe; font-size: 0.9rem; margin: 0;">AI-Powered Communication and Agricultural Guidance Platform</p>
+                </div>
+            </div>
+            <p style="margin-top: 20px; font-size: 0.95rem; color: #e2e8f0; line-height: 1.7; max-width: 680px;">
+                GNANI VOX connects people through intelligent multilingual voice translation and provides farmers with accessible AI-powered agricultural guidance. Built for Indian communities — farmers, workers, students, travellers and shopkeepers — who face language barriers every day.
+            </p>
+            <div style="margin-top: 16px; padding: 10px 18px; background: rgba(255,255,255,0.1); border-radius: 8px; display: inline-block; font-size: 0.85rem; color: #a7f3d0; border: 1px solid rgba(167,243,208,0.3);">
+                🤝 Powered by Gnani AI — Prisma STT · Timbre TTS · Evon NLP
+            </div>
+        </div>
+
+        <!-- TWO FEATURES -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 28px;">
+            <!-- VoxConnect -->
+            <div class="screen-card-box feature-card-vox" style="padding: 28px 24px;">
+                <div style="font-size: 2.2rem; margin-bottom: 10px;">🌐</div>
+                <div style="font-size: 0.72rem; font-weight: 800; color: #1e40af; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px;">Feature 1</div>
+                <h2 style="font-size: 1.3rem; color: #1e3a5f; margin-bottom: 8px;">VoxConnect</h2>
+                <p style="font-size: 0.88rem; color: #64748b; font-style: italic; margin-bottom: 10px;">Speak in Your Language. Understand Any Language.</p>
+                <p style="font-size: 0.9rem; color: #334155; line-height: 1.65;">
+                    VoxConnect is a universal voice translator designed for <strong>everyone</strong>: farmers, daily-wage workers, students, travellers, shopkeepers and business owners. Any two people speaking different languages can communicate naturally through real-time voice translation.
+                </p>
+                <ul style="margin-top: 14px; padding-left: 18px; font-size: 0.87rem; color: #475569; line-height: 1.8;">
+                    <li>Speak naturally — Gnani Prisma transcribes your speech instantly</li>
+                    <li>Gemini AI translates to the target language accurately</li>
+                    <li>Gnani Timbre speaks the translation in a natural voice</li>
+                    <li>Conversation Mode: two-person live dialogue with real-time switching</li>
+                    <li>Supports 10+ Indian languages including Kannada, Telugu, Tamil, Hindi, Malayalam and more</li>
+                </ul>
+                <a href="{{ url_for('voxconnect_screen') }}" class="service-btn" style="display: inline-flex; margin-top: 18px; padding: 10px 22px; background: #2563eb; border-color: #2563eb;">
+                    Open VoxConnect →
+                </a>
+            </div>
+
+            <!-- KrishiGuide AI -->
+            <div class="screen-card-box feature-card-krishi" style="padding: 28px 24px;">
+                <div style="font-size: 2.2rem; margin-bottom: 10px;">🌿</div>
+                <div style="font-size: 0.72rem; font-weight: 800; color: #14532d; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px;">Feature 2</div>
+                <h2 style="font-size: 1.3rem; color: #14532d; margin-bottom: 8px;">KrishiGuide AI</h2>
+                <p style="font-size: 0.88rem; color: #64748b; font-style: italic; margin-bottom: 10px;">Your Intelligent Agricultural Guidance Assistant.</p>
+                <p style="font-size: 0.9rem; color: #334155; line-height: 1.65;">
+                    KrishiGuide AI is a dedicated farming assistant that answers all agricultural questions through voice or text — with <strong>permanent conversation memory</strong>. It remembers your crop name, growth stage, symptoms and soil type across all follow-up questions.
+                </p>
+                <ul style="margin-top: 14px; padding-left: 18px; font-size: 0.87rem; color: #475569; line-height: 1.8;">
+                    <li>Ask about crops, fertilizers, pests, diseases, irrigation and soil</li>
+                    <li>AI remembers the full conversation — no need to repeat yourself</li>
+                    <li>Upload a crop photo for visual disease diagnosis</li>
+                    <li>Receive answers in your chosen Indian language</li>
+                    <li>Powered by Gemini AI with ICAR agricultural knowledge grounding</li>
+                </ul>
+                <a href="{{ url_for('krishiguide_screen') }}" class="service-btn" style="display: inline-flex; margin-top: 18px; padding: 10px 22px;">
+                    Open KrishiGuide AI →
+                </a>
+            </div>
+        </div>
+
+        <!-- HOW IT WORKS -->
+        <div class="screen-card-box" style="margin-bottom: 28px; padding: 32px 28px;">
+            <div style="text-align: center; margin-bottom: 24px;">
+                <span class="section-badge">TECHNOLOGY</span>
+                <h2 class="section-title" style="margin-top: 10px;">How GNANI VOX Works</h2>
+                <p class="section-subtext">Three Gnani AI services working together in real-time</p>
+            </div>
+            <div class="steps-grid">
+                <div class="step-card">
+                    <div class="step-number">1</div>
+                    <div class="step-icon">🎙️</div>
+                    <h4 style="font-weight: 700; margin-bottom: 6px;">Speech Recognition</h4>
+                    <p style="font-size: 0.85rem; color: #64748b; line-height: 1.6;">Gnani <strong>Prisma STT</strong> converts your spoken words into text with high accuracy, even for Indian language accents and dialects.</p>
+                </div>
+                <div class="step-card">
+                    <div class="step-number">2</div>
+                    <div class="step-icon">🧠</div>
+                    <h4 style="font-weight: 700; margin-bottom: 6px;">AI Translation & Reasoning</h4>
+                    <p style="font-size: 0.85rem; color: #64748b; line-height: 1.6;"><strong>Gemini AI</strong> translates between languages and answers farming questions using ICAR-grounded agricultural knowledge.</p>
+                </div>
+                <div class="step-card">
+                    <div class="step-number">3</div>
+                    <div class="step-icon">🔊</div>
+                    <h4 style="font-weight: 700; margin-bottom: 6px;">Voice Synthesis</h4>
+                    <p style="font-size: 0.85rem; color: #64748b; line-height: 1.6;">Gnani <strong>Timbre TTS</strong> converts the translated or AI-generated answer into natural, clear speech in your chosen language.</p>
+                </div>
+                <div class="step-card">
+                    <div class="step-number">4</div>
+                    <div class="step-icon">🗄️</div>
+                    <h4 style="font-weight: 700; margin-bottom: 6px;">Persistent Memory</h4>
+                    <p style="font-size: 0.85rem; color: #64748b; line-height: 1.6;">All conversations are stored in a local <strong>SQLite</strong> database so KrishiGuide AI remembers every detail across follow-up questions.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- TECH STACK -->
+        <div class="screen-card-box" style="margin-bottom: 28px; padding: 28px;">
+            <h3 style="font-size: 1.1rem; color: #1e3a5f; margin-bottom: 18px; font-weight: 800;">🛠️ Technology Stack</h3>
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;">
+                <div style="padding: 16px; background: #f8fafc; border-radius: 10px; border: 1px solid #e2e8f0; text-align: center;">
+                    <div style="font-size: 1.5rem; margin-bottom: 6px;">🎙️</div>
+                    <strong style="font-size: 0.9rem; color: #334155;">Gnani Prisma</strong>
+                    <p style="font-size: 0.78rem; color: #64748b; margin: 4px 0 0;">Speech-to-Text (STT) for 10+ Indian languages</p>
+                </div>
+                <div style="padding: 16px; background: #f8fafc; border-radius: 10px; border: 1px solid #e2e8f0; text-align: center;">
+                    <div style="font-size: 1.5rem; margin-bottom: 6px;">🔊</div>
+                    <strong style="font-size: 0.9rem; color: #334155;">Gnani Timbre</strong>
+                    <p style="font-size: 0.78rem; color: #64748b; margin: 4px 0 0;">Text-to-Speech (TTS) with natural Indian voices</p>
+                </div>
+                <div style="padding: 16px; background: #f8fafc; border-radius: 10px; border: 1px solid #e2e8f0; text-align: center;">
+                    <div style="font-size: 1.5rem; margin-bottom: 6px;">🌐</div>
+                    <strong style="font-size: 0.9rem; color: #334155;">Gnani Evon</strong>
+                    <p style="font-size: 0.78rem; color: #64748b; margin: 4px 0 0;">NLP translation engine for Indian language pairs</p>
+                </div>
+                <div style="padding: 16px; background: #f8fafc; border-radius: 10px; border: 1px solid #e2e8f0; text-align: center;">
+                    <div style="font-size: 1.5rem; margin-bottom: 6px;">🧠</div>
+                    <strong style="font-size: 0.9rem; color: #334155;">Google Gemini AI</strong>
+                    <p style="font-size: 0.78rem; color: #64748b; margin: 4px 0 0;">Multilingual AI for farming guidance & translation</p>
+                </div>
+                <div style="padding: 16px; background: #f8fafc; border-radius: 10px; border: 1px solid #e2e8f0; text-align: center;">
+                    <div style="font-size: 1.5rem; margin-bottom: 6px;">🐍</div>
+                    <strong style="font-size: 0.9rem; color: #334155;">Python Flask</strong>
+                    <p style="font-size: 0.78rem; color: #64748b; margin: 4px 0 0;">Backend web framework with RESTful API design</p>
+                </div>
+                <div style="padding: 16px; background: #f8fafc; border-radius: 10px; border: 1px solid #e2e8f0; text-align: center;">
+                    <div style="font-size: 1.5rem; margin-bottom: 6px;">🗄️</div>
+                    <strong style="font-size: 0.9rem; color: #334155;">SQLite + SQLAlchemy</strong>
+                    <p style="font-size: 0.78rem; color: #64748b; margin: 4px 0 0;">Local database for persistent conversation memory</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- GNANI AI INTEGRATION NOTICE -->
+        <div style="padding: 20px 24px; background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 12px; margin-bottom: 24px; text-align: center;">
+            <p style="font-size: 0.9rem; color: #064e3b; margin: 0;">
+                <strong>🤝 Powered by Gnani AI</strong> — GNANI VOX integrates the Gnani AI voice infrastructure (Prisma STT, Timbre TTS, and Evon NLP) for all speech recognition and voice synthesis capabilities. This application is an independent integration and does not imply official partnership or endorsement by Gnani.ai Pvt. Ltd.
+            </p>
+        </div>
+    </div>
+</div>
+
+<style>
+@media (max-width: 768px) {
+    .steps-grid { grid-template-columns: 1fr 1fr !important; }
+}
+@media (max-width: 480px) {
+    .steps-grid { grid-template-columns: 1fr !important; }
+    .screen-card-box + .screen-card-box { grid-template-columns: 1fr !important; }
+}
+</style>
+{% endblock %}
+

@@ -25,7 +25,7 @@ if BASE_DIR not in sys.path:
 # Force pure-Python SQLAlchemy mode to comply with Windows security policies
 os.environ['DISABLE_SQLALCHEMY_CEXT'] = '1'
 
-from flask import Flask, render_template, jsonify, request
+from flask import Flask, render_template, jsonify, request, send_from_directory
 from config import Config
 from models import db, Conversation, Message
 from routes.translation import translation_bp
@@ -37,10 +37,29 @@ from services.evon_service import EvonService
 from services.gemini_service import GeminiService
 
 def create_app():
+    base_dir = os.path.abspath(os.path.dirname(__file__))
+
+    template_candidates = [
+        os.path.join(base_dir, 'templates'),
+        os.path.join(base_dir, 'api', 'templates'),
+        os.path.join(os.getcwd(), 'templates'),
+        os.path.join(os.getcwd(), 'api', 'templates')
+    ]
+    template_folder = next((p for p in template_candidates if os.path.isdir(p)), template_candidates[0])
+
+    static_candidates = [
+        os.path.join(base_dir, 'static'),
+        os.path.join(base_dir, 'api', 'static'),
+        os.path.join(os.getcwd(), 'static'),
+        os.path.join(os.getcwd(), 'api', 'static')
+    ]
+    static_folder = next((p for p in static_candidates if os.path.isdir(p)), static_candidates[0])
+
     app = Flask(
         __name__,
-        template_folder=os.path.join(os.path.dirname(__file__), 'templates'),
-        static_folder=os.path.join(os.path.dirname(__file__), 'static')
+        template_folder=template_folder,
+        static_folder=static_folder,
+        static_url_path='/static'
     )
     app.config.from_object(Config)
 
@@ -57,6 +76,15 @@ def create_app():
         os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
     except Exception as e:
         app.logger.warning(f"Uploads directory notice: {e}")
+
+    # Explicit fallback route for static assets in serverless environments
+    @app.route('/static/<path:filename>')
+    def serve_static(filename):
+        for s_dir in static_candidates:
+            target = os.path.join(s_dir, filename)
+            if os.path.isfile(target):
+                return send_from_directory(s_dir, filename)
+        return jsonify({'error': f'Static file {filename} not found'}), 404
 
     # Register Blueprints
     app.register_blueprint(translation_bp)

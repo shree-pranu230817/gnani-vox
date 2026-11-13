@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}GNANI VOX – One Voice. Many Languages. No Barriers.{% endblock %}</title>
+
+    <!-- Google Fonts for Kannada, Telugu, Tamil, Hindi & Modern Indian Typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+Bengali:wght@400;600;700&family=Noto+Sans+Devanagari:wght@400;600;700&family=Noto+Sans+Gujarati:wght@400;600;700&family=Noto+Sans+Gurmukhi:wght@400;600;700&family=Noto+Sans+Kannada:wght@400;600;700;800&family=Noto+Sans+Malayalam:wght@400;600;700&family=Noto+Sans+Tamil:wght@400;600;700&family=Noto+Sans+Telugu:wght@400;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Stylesheet -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/gnani_vox_logo.png') }}">
+    {% block extra_head %}{% endblock %}
+</head>
+<body data-site-lang="en">
+
+    <!-- Header Navigation Bar -->
+    <header class="main-header">
+        <div class="container header-inner">
+            <a href="{{ url_for('index') }}" class="brand-group" title="GNANI VOX – Home">
+                <img src="{{ url_for('static', filename='images/gnani_vox_logo.png') }}" alt="GNANI VOX Logo" class="header-logo-img">
+                <div class="brand-text">
+                    <h1>GNANI VOX</h1>
+                    <span class="subtext" data-i18n="brand_subtext">One Voice. Many Languages. No Barriers.</span>
+                </div>
+            </a>
+
+            <nav aria-label="Main Navigation">
+                <button class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false">☰</button>
+                <ul class="nav-links">
+                    <li><a href="{{ url_for('index') }}" class="nav-link {% if request.path == '/' %}active{% endif %}" data-i18n="nav_home">🏠 Home</a></li>
+                    <li><a href="{{ url_for('voxconnect_screen') }}" class="nav-link {% if request.path in ['/voxconnect', '/farmer-translator'] %}active{% endif %}" data-i18n="nav_voxconnect">🌐 VoxConnect</a></li>
+                    <li><a href="{{ url_for('krishiguide_screen') }}" class="nav-link {% if request.path in ['/krishiguide', '/farming-assistant'] %}active{% endif %}" data-i18n="nav_krishiguide">🌿 KrishiGuide AI</a></li>
+                    <li><a href="{{ url_for('about_screen') }}" class="nav-link {% if request.path == '/about' %}active{% endif %}" data-i18n="nav_about">ℹ️ About</a></li>
+                </ul>
+            </nav>
+
+            <div class="header-right-actions">
+                <!-- Website Preferred Language Selector -->
+                <div class="site-lang-picker" title="Choose Preferred Website Language">
+                    <span class="site-lang-icon" aria-hidden="true">🌐</span>
+                    <select id="siteLanguageSelector" class="site-lang-select" aria-label="Choose Preferred Website Language">
+                        {% for code, info in languages.items() %}
+                        <option value="{{ code }}" class="font-{{ code }}" {% if code == 'en' %}selected{% endif %}>
+                            {% if info.native == info.name %}{{ info.flag }} {{ info.name }}{% else %}{{ info.flag }} {{ info.native }} ({{ info.name }}){% endif %}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="header-status-badge" id="systemStatusBadge" title="Gnani AI Integration Status">
+                    <span class="status-dot"></span>
+                    <span id="systemStatusText" data-i18n="status_active">⚡ Powered by Gnani AI</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Content Block -->
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="site-footer">
+        <div class="container footer-inner">
+            <div class="footer-brand-col">
+                <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
+                    <img src="{{ url_for('static', filename='images/gnani_vox_logo.png') }}" alt="GNANI VOX" style="height: 40px; border-radius: 8px; background: #ffffff; padding: 2px;">
+                    <div>
+                        <strong style="font-size: 1.15rem; color: #ffffff;">GNANI VOX</strong><br>
+                        <span style="font-size: 0.85rem; color: #94a3b8;" data-i18n="footer_tagline">One Voice. Many Languages. No Barriers.</span>
+                    </div>
+                </div>
+                <p style="font-size: 0.82rem; color: #cbd5e1; max-width: 480px; line-height: 1.5;" data-i18n="brand_desc">
+                    GNANI VOX connects people through intelligent multilingual voice translation and provides farmers with accessible AI-powered agricultural guidance.
+                </p>
+                <div class="footer-gnani-badge">
+                    <span style="font-size: 0.82rem; color: #6ee7b7; font-weight: 600;">⚡ Powered by Gnani AI</span>
+                    <span style="font-size: 0.78rem; color: #94a3b8;">• Speech-to-Text &amp; Text-to-Speech Engine</span>
+                </div>
+            </div>
+
+            <div class="footer-links-col">
+                <h4 style="color: #ffffff; font-size: 0.95rem; margin-bottom: 12px;" data-i18n="footer_quick_links">Platform Features</h4>
+                <ul style="list-style: none; display: flex; flex-direction: column; gap: 8px; font-size: 0.88rem;">
+                    <li><a href="{{ url_for('index') }}" style="color: #cbd5e1; text-decoration: none;" data-i18n="nav_home">🏠 Home</a></li>
+                    <li><a href="{{ url_for('voxconnect_screen') }}" style="color: #cbd5e1; text-decoration: none;" data-i18n="nav_voxconnect">🌐 VoxConnect (Universal Translator)</a></li>
+                    <li><a href="{{ url_for('krishiguide_screen') }}" style="color: #cbd5e1; text-decoration: none;" data-i18n="nav_krishiguide">🌿 KrishiGuide AI (Farmer Guidance)</a></li>
+                    <li><a href="{{ url_for('about_screen') }}" style="color: #cbd5e1; text-decoration: none;" data-i18n="nav_about">ℹ️ About GNANI VOX</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-tech-col">
+                <h4 style="color: #ffffff; font-size: 0.95rem; margin-bottom: 12px;">Architecture Stack</h4>
+                <div style="font-size: 0.82rem; color: #cbd5e1; display: flex; flex-direction: column; gap: 6px;">
+                    <span>🎙️ <strong>Gnani Prisma STT:</strong> High-speed Indian speech recognition</span>
+                    <span>🔊 <strong>Gnani Timbre TTS:</strong> Natural neural speech synthesis</span>
+                    <span>🧠 <strong>Gemini Agronomic AI:</strong> ICAR-grounded crop intelligence</span>
+                    <span>💾 <strong>SQLite Permanent Memory:</strong> Continuous conversation retention</span>
+                </div>
+            </div>
+        </div>
+        <div class="container footer-bottom-bar">
+            <span>&copy; 2026 GNANI VOX. All rights reserved.</span>
+            <span>Independent implementation powered by Gnani AI voice APIs.</span>
+        </div>
+    </footer>
+
+    <!-- Site Language & Font Switcher Script -->
+    <script src="{{ url_for('static', filename='js/site_language.js') }}"></script>
+    <!-- Central Audio Controller Script -->
+    <script src="{{ url_for('static', filename='js/audio_controller.js') }}"></script>
+    {% block extra_scripts %}{% endblock %}
+
+</body>
+</html>

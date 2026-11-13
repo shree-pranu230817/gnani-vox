@@ -1,0 +1,279 @@
+{% extends 'base.html' %}
+
+{% block title %}VoxConnect – Universal Voice Translator | GNANI VOX{% endblock %}
+
+{% block content %}
+<div class="screen-wrapper">
+    <div class="container">
+        <!-- Breadcrumb / Back Link -->
+        <div style="margin-bottom: 16px;">
+            <a href="{{ url_for('index') }}" style="font-weight: 700; color: var(--primary-green); display: inline-flex; align-items: center; gap: 6px;">
+                <span data-i18n="back_to_home">← Back to Home</span>
+            </a>
+        </div>
+
+        <div class="screen-card-box">
+            <!-- Screen Header -->
+            <div class="screen-header-bar">
+                <div class="screen-header-left">
+                    <h2 data-i18n="vox_title">🌐 VoxConnect – Universal Voice Translator</h2>
+                    <p data-i18n="vox_subtitle">Speak in Your Language. Understand Any Language. For everyone — travellers, workers, students, shopkeepers and more.</p>
+                </div>
+                <div>
+                    <button id="btnClearScreen" class="btn-icon-action" title="Clear all text and restart">
+                        <span>🔄</span>
+                        <span data-i18n="clear_conv_btn">Clear Conversation</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Language Selector Strip with Swap Button -->
+            <div class="lang-selector-strip">
+                <div class="lang-select-box">
+                    <label data-i18n="my_lang_label">My Language:</label>
+                    <select id="sourceLangSelect" class="styled-lang-select">
+                        {% for code, info in languages.items() %}
+                        <option value="{{ code }}" class="font-{{ code }}" {% if code == 'en' %}selected{% endif %}>
+                            {% if info.native == info.name %}{{ info.flag }} {{ info.name }}{% else %}{{ info.flag }} {{ info.native }} ({{ info.name }}){% endif %}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <button id="btnSwapLanguages" class="btn-swap-lang" title="Swap Languages">
+                    ⇄
+                </button>
+
+                <div class="lang-select-box">
+                    <label data-i18n="translate_to_label">Translate To:</label>
+                    <select id="targetLangSelect" class="styled-lang-select">
+                        {% for code, info in languages.items() %}
+                        <option value="{{ code }}" class="font-{{ code }}" {% if code == 'kn' %}selected{% endif %}>
+                            {% if info.native == info.name %}{{ info.flag }} {{ info.name }}{% else %}{{ info.flag }} {{ info.native }} ({{ info.name }}){% endif %}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Domain (hidden, general) -->
+                <input type="hidden" id="translationDomain" value="general">
+            </div>
+
+            <!-- Hands-Free Conversation Toggle Strip -->
+            <div class="handsfree-toggle-strip">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <span data-i18n="mode_label">🎙️ Mode:</span>
+                    <strong id="modeLabelText" data-i18n="mode_tap">Tap to Speak</strong>
+                </div>
+                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                    <input type="checkbox" id="handsFreeToggle">
+                    <span data-i18n="mode_handsfree">Hands-Free Mode</span>
+                </label>
+            </div>
+
+            <!-- Central Microphone Voice Control Unit -->
+            <div class="voice-control-unit">
+                <button id="mainMicBtn" class="big-mic-btn" title="Tap to Speak">
+                    🎙️
+                </button>
+                <div id="voiceStatusBanner" class="voice-status-banner" data-i18n="status_ready">
+                    Ready to speak
+                </div>
+            </div>
+
+            <!-- Dual Translation Display Cards -->
+            <div class="translation-display-grid">
+                <!-- Source Speech Box -->
+                <div class="trans-box">
+                    <div>
+                        <div class="trans-box-header">
+                            <span id="sourceBoxLabel" data-i18n="source_box_title">Original Speech:</span>
+                            <span id="sourceBadgePrisma" style="font-size: 0.72rem; color: #15803d;">🎙️ Prisma STT</span>
+                        </div>
+                        <div id="sourceTextArea" class="trans-text-area" placeholder="Your spoken words will appear here..." data-i18n-placeholder="source_placeholder">
+                            (Your spoken words will appear here)
+                        </div>
+                    </div>
+                    <div class="trans-actions-row">
+                        <button id="btnCopySource" class="btn-icon-action" title="Copy text">📋 <span data-i18n="copy_btn">Copy</span></button>
+                    </div>
+                </div>
+
+                <!-- Translated Target Speech Box -->
+                <div class="trans-box target-box">
+                    <div>
+                        <div class="trans-box-header">
+                            <span id="targetBoxLabel" data-i18n="target_box_title">Translated Speech:</span>
+                            <span id="targetBadgeTimbre" style="font-size: 0.72rem; color: #0284c7;">🔊 Timbre TTS</span>
+                        </div>
+                        <div id="targetTextArea" class="trans-text-area" placeholder="Translated text and audio will appear here..." data-i18n-placeholder="target_placeholder">
+                            (Translated text and voice will appear here)
+                        </div>
+                    </div>
+                    <div class="trans-actions-row">
+                        <button id="btnPlayTarget" class="btn-icon-action" style="background: var(--primary-green); color: #fff;" title="Play audio">
+                            <span>🔊</span>
+                            <span id="playBtnText" data-i18n="play_btn">Play Audio</span>
+                        </button>
+                        <button id="btnStopTarget" class="btn-icon-action" title="Stop audio">
+                            <span>⏹️</span>
+                            <span data-i18n="stop_btn">Stop</span>
+                        </button>
+                        <button id="btnCopyTarget" class="btn-icon-action" title="Copy text">📋 <span data-i18n="copy_btn">Copy</span></button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Latency Breakdown Bar -->
+            <div id="transTimingBar" style="display: none; margin: 14px 0 6px 0; font-size: 0.8rem; color: #475569; background: #f8fafc; border: 1px solid #e2e8f0; padding: 7px 14px; border-radius: 6px; font-family: monospace;"></div>
+
+            <!-- Quick Universal Topic Chips -->
+            <div class="quick-chips-wrapper">
+                <div class="quick-chips-label" data-i18n="quick_vox_phrases">Quick Phrases:</div>
+                <div class="quick-chips-row">
+                    <button type="button" class="chip-btn" data-text="Where is the nearest hospital?" data-i18n="qv_1">🏥 Where is the nearest hospital?</button>
+                    <button type="button" class="chip-btn" data-text="How much does this cost?" data-i18n="qv_2">💰 How much does this cost?</button>
+                    <button type="button" class="chip-btn" data-text="I need help, please." data-i18n="qv_3">🆘 I need help, please.</button>
+                    <button type="button" class="chip-btn" data-text="What is the bus fare to the city?" data-i18n="qv_4">🚌 What is the bus fare to the city?</button>
+                    <button type="button" class="chip-btn" data-text="Can I get a receipt for this?" data-i18n="qv_5">🧾 Can I get a receipt for this?</button>
+                    <button type="button" class="chip-btn" data-text="I am a daily wage worker. What is today's work schedule?" data-i18n="qv_6">👷 What is today's work schedule?</button>
+                </div>
+            </div>
+
+            <!-- CONVERSATION MODE SECTION -->
+            <div style="margin-top: 32px;">
+                <div class="section-heading-row" style="margin-bottom: 16px;">
+                    <span class="section-badge" style="background: #eff6ff; color: #1e40af; border: 1px solid #bfdbfe;">CONVERSATION MODE</span>
+                    <h3 style="font-size: 1.1rem; color: #1e3a5f; margin: 8px 0 4px;">
+                        🗣️ Two-Person Live Conversation
+                    </h3>
+                    <p style="font-size: 0.88rem; color: #64748b;">Person A and Person B each speak in their own language. GNANI VOX translates in real time.</p>
+                </div>
+                <div class="conversation-mode-grid">
+                    <!-- Person A Panel -->
+                    <div class="person-panel person-panel-a">
+                        <div style="font-weight: 800; color: #1e40af; margin-bottom: 10px; font-size: 0.95rem;">👤 Person A</div>
+                        <div class="lang-select-box" style="margin-bottom: 12px;">
+                            <label style="font-size: 0.8rem; color: #475569;">Person A Language:</label>
+                            <select id="personALangSelect" class="styled-lang-select">
+                                {% for code, info in languages.items() %}
+                                <option value="{{ code }}" class="font-{{ code }}" {% if code == 'en' %}selected{% endif %}>
+                                    {% if info.native == info.name %}{{ info.flag }} {{ info.name }}{% else %}{{ info.flag }} {{ info.native }} ({{ info.name }}){% endif %}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <button id="personAMicBtn" class="btn-icon-action" style="width: 100%; justify-content: center; padding: 14px; font-size: 1.1rem; background: #eff6ff; border-color: #bfdbfe; color: #1e40af;" title="Person A: Tap to Speak">
+                            🎙️ <span>Tap to Speak (A)</span>
+                        </button>
+                        <div id="personAText" style="margin-top: 10px; padding: 10px; background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; min-height: 48px; font-size: 0.9rem; color: #334155;">
+                            <span style="color: #94a3b8; font-style: italic;">Person A speech appears here...</span>
+                        </div>
+                        <div id="personATranslated" style="margin-top: 8px; padding: 10px; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; min-height: 40px; font-size: 0.9rem; color: #14532d;">
+                            <span style="color: #94a3b8; font-style: italic;">Translation for Person B...</span>
+                        </div>
+                    </div>
+
+                    <!-- Person B Panel -->
+                    <div class="person-panel person-panel-b">
+                        <div style="font-weight: 800; color: #14532d; margin-bottom: 10px; font-size: 0.95rem;">👤 Person B</div>
+                        <div class="lang-select-box" style="margin-bottom: 12px;">
+                            <label style="font-size: 0.8rem; color: #475569;">Person B Language:</label>
+                            <select id="personBLangSelect" class="styled-lang-select">
+                                {% for code, info in languages.items() %}
+                                <option value="{{ code }}" class="font-{{ code }}" {% if code == 'kn' %}selected{% endif %}>
+                                    {% if info.native == info.name %}{{ info.flag }} {{ info.name }}{% else %}{{ info.flag }} {{ info.native }} ({{ info.name }}){% endif %}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <button id="personBMicBtn" class="btn-icon-action" style="width: 100%; justify-content: center; padding: 14px; font-size: 1.1rem; background: #f0fdf4; border-color: #bbf7d0; color: #14532d;" title="Person B: Tap to Speak">
+                            🎙️ <span>Tap to Speak (B)</span>
+                        </button>
+                        <div id="personBText" style="margin-top: 10px; padding: 10px; background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; min-height: 48px; font-size: 0.9rem; color: #334155;">
+                            <span style="color: #94a3b8; font-style: italic;">Person B speech appears here...</span>
+                        </div>
+                        <div id="personBTranslated" style="margin-top: 8px; padding: 10px; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; min-height: 40px; font-size: 0.9rem; color: #1e40af;">
+                            <span style="color: #94a3b8; font-style: italic;">Translation for Person A...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- INFO FOOTER -->
+            <div style="margin-top: 24px; padding: 12px 16px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; font-size: 0.82rem; color: #64748b; display: flex; align-items: center; gap: 8px;">
+                <span>🌐</span>
+                <span>GNANI VOX VoxConnect uses <strong>Gnani Prisma</strong> for speech recognition and <strong>Gnani Timbre</strong> for natural voice synthesis across 10+ Indian languages.</span>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="{{ url_for('static', filename='js/farmer_translator.js') }}"></script>
+<script>
+// Conversation Mode: Person A/B mic buttons using the same voice pipeline
+(function() {
+    'use strict';
+
+    function getSourceLang() { return document.getElementById('sourceLangSelect').value; }
+    function getTargetLang() { return document.getElementById('targetLangSelect').value; }
+
+    // Person A mic: speaks in personALang, translated to personBLang
+    const personABtn = document.getElementById('personAMicBtn');
+    const personBBtn = document.getElementById('personBMicBtn');
+
+    if (!personABtn || !personBBtn) return;
+
+    function doConversationRecord(speakerSrcId, speakerTgtId, srcTextId, tgtTextId, btnEl) {
+        const srcLang = document.getElementById(speakerSrcId).value;
+        const tgtLang = document.getElementById(speakerTgtId).value;
+
+        // Set the main selectors to match, then trigger existing voice pipeline
+        const src = document.getElementById('sourceLangSelect');
+        const tgt = document.getElementById('targetLangSelect');
+        if (src) src.value = srcLang;
+        if (tgt) tgt.value = tgtLang;
+
+        // Fire the main mic button click to use the existing pipeline
+        const mainMic = document.getElementById('mainMicBtn');
+        if (mainMic) {
+            // Listen for one STT result, then copy to panel
+            const onLangChange = function(e) {
+                window.removeEventListener('uzhavar:languageChanged', onLangChange);
+            };
+
+            // Override display to show in conversation panels
+            const origSourceArea = document.getElementById('sourceTextArea');
+            const origTargetArea = document.getElementById('targetTextArea');
+            const panelSrc = document.getElementById(srcTextId);
+            const panelTgt = document.getElementById(tgtTextId);
+
+            const observer = new MutationObserver(function() {
+                if (origSourceArea.textContent && origSourceArea.textContent.trim() !== '(Your spoken words will appear here)') {
+                    panelSrc.innerHTML = `<span style="color:#334155;">${origSourceArea.textContent}</span>`;
+                }
+                if (origTargetArea.textContent && origTargetArea.textContent.trim() !== '(Translated text and voice will appear here)') {
+                    panelTgt.innerHTML = `<span style="color:#14532d;">${origTargetArea.textContent}</span>`;
+                }
+            });
+            observer.observe(origSourceArea, { childList: true, subtree: true, characterData: true });
+            observer.observe(origTargetArea, { childList: true, subtree: true, characterData: true });
+
+            setTimeout(() => { observer.disconnect(); }, 30000);
+            mainMic.click();
+        }
+    }
+
+    personABtn.addEventListener('click', function() {
+        doConversationRecord('personALangSelect', 'personBLangSelect', 'personAText', 'personATranslated', personABtn);
+    });
+
+    personBBtn.addEventListener('click', function() {
+        doConversationRecord('personBLangSelect', 'personALangSelect', 'personBText', 'personBTranslated', personBBtn);
+    });
+})();
+</script>
+{% endblock %}
+
