@@ -1,0 +1,147 @@
+{% extends 'base.html' %}
+
+{% block title %}Farmer Voice Translator | UZHAVAR AI{% endblock %}
+
+{% block content %}
+<div class="screen-wrapper">
+    <div class="container">
+        <!-- Breadcrumb / Back Link -->
+        <div style="margin-bottom: 16px;">
+            <a href="{{ url_for('index') }}" style="font-weight: 700; color: var(--primary-green); display: inline-flex; align-items: center; gap: 6px;">
+                <span data-i18n="back_to_home">← Back to Home</span>
+            </a>
+        </div>
+
+        <div class="screen-card-box">
+            <!-- Screen Header -->
+            <div class="screen-header-bar">
+                <div class="screen-header-left">
+                    <h2 data-i18n="farmer_title">🌾 Farmer Voice Translator</h2>
+                    <p data-i18n="farmer_subtitle">Speak about crops, fertilizers, pesticides, market prices and labor – get immediate translated voice.</p>
+                </div>
+                <div>
+                    <button id="btnClearScreen" class="btn-icon-action" title="Clear all text and restart">
+                        <span>🔄</span>
+                        <span data-i18n="clear_conv_btn">Clear Conversation</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Language Selector Strip with Swap Button -->
+            <div class="lang-selector-strip">
+                <div class="lang-select-box">
+                    <label data-i18n="my_lang_label">My Language:</label>
+                    <select id="sourceLangSelect" class="styled-lang-select">
+                        {% for code, info in languages.items() %}
+                        <option value="{{ code }}" class="font-{{ code }}" {% if code == 'en' %}selected{% endif %}>
+                            {% if info.native == info.name %}{{ info.flag }} {{ info.name }}{% else %}{{ info.flag }} {{ info.native }} ({{ info.name }}){% endif %}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <button id="btnSwapLanguages" class="btn-swap-lang" title="Swap Languages">
+                    ⇄
+                </button>
+
+                <div class="lang-select-box">
+                    <label data-i18n="translate_to_label">Translate To:</label>
+                    <select id="targetLangSelect" class="styled-lang-select">
+                        {% for code, info in languages.items() %}
+                        <option value="{{ code }}" class="font-{{ code }}" {% if code == 'kn' %}selected{% endif %}>
+                            {% if info.native == info.name %}{{ info.flag }} {{ info.name }}{% else %}{{ info.flag }} {{ info.native }} ({{ info.name }}){% endif %}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+
+            <!-- Hands-Free Conversation Toggle Strip -->
+            <div class="handsfree-toggle-strip">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <span data-i18n="mode_label">🎙️ Mode:</span>
+                    <strong id="modeLabelText" data-i18n="mode_tap">Tap to Speak</strong>
+                </div>
+                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                    <input type="checkbox" id="handsFreeToggle">
+                    <span data-i18n="mode_handsfree">Hands-Free Mode</span>
+                </label>
+            </div>
+
+            <!-- Central Microphone Voice Control Unit -->
+            <div class="voice-control-unit">
+                <button id="mainMicBtn" class="big-mic-btn" title="Tap to Speak">
+                    🎙️
+                </button>
+                <div id="voiceStatusBanner" class="voice-status-banner" data-i18n="status_ready">
+                    Ready to speak
+                </div>
+            </div>
+
+            <!-- Dual Translation Display Cards -->
+            <div class="translation-display-grid">
+                <!-- Source Speech Box -->
+                <div class="trans-box">
+                    <div>
+                        <div class="trans-box-header">
+                            <span id="sourceBoxLabel" data-i18n="source_box_title">Original Speech:</span>
+                            <span id="sourceBadgePrisma" style="font-size: 0.72rem; color: #15803d;">🎙️ Prisma STT</span>
+                        </div>
+                        <div id="sourceTextArea" class="trans-text-area" placeholder="Your spoken words will appear here..." data-i18n-placeholder="source_placeholder">
+                            (Your spoken words will appear here)
+                        </div>
+                    </div>
+                    <div class="trans-actions-row">
+                        <button id="btnCopySource" class="btn-icon-action" title="Copy text">📋 <span data-i18n="copy_btn">Copy</span></button>
+                    </div>
+                </div>
+
+                <!-- Translated Target Speech Box -->
+                <div class="trans-box target-box">
+                    <div>
+                        <div class="trans-box-header">
+                            <span id="targetBoxLabel" data-i18n="target_box_title">Translated Speech:</span>
+                            <span id="targetBadgeTimbre" style="font-size: 0.72rem; color: #0284c7;">🔊 Timbre TTS</span>
+                        </div>
+                        <div id="targetTextArea" class="trans-text-area" placeholder="Translated text and audio will appear here..." data-i18n-placeholder="target_placeholder">
+                            (Translated text and voice will appear here)
+                        </div>
+                    </div>
+                    <div class="trans-actions-row">
+                        <button id="btnPlayTarget" class="btn-icon-action" style="background: var(--primary-green); color: #fff;" title="Play audio">
+                            <span>🔊</span>
+                            <span id="playBtnText" data-i18n="play_btn">Play Audio</span>
+                        </button>
+                        <button id="btnStopTarget" class="btn-icon-action" title="Stop audio">
+                            <span>⏹️</span>
+                            <span data-i18n="stop_btn">Stop</span>
+                        </button>
+                        <button id="btnCopyTarget" class="btn-icon-action" title="Copy text">📋 <span data-i18n="copy_btn">Copy</span></button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Latency Breakdown Bar -->
+            <div id="transTimingBar" style="display: none; margin: 14px 0 6px 0; font-size: 0.8rem; color: #475569; background: #f8fafc; border: 1px solid #e2e8f0; padding: 7px 14px; border-radius: 6px; font-family: monospace;"></div>
+
+            <!-- Quick Agricultural Topic Chips -->
+            <div class="quick-chips-wrapper">
+                <div class="quick-chips-label" data-i18n="quick_farmer_phrases">Quick Farming Phrases:</div>
+                <div class="quick-chips-row">
+                    <button type="button" class="chip-btn" data-text="What is the recommended fertilizer for paddy?" data-i18n="qf_1">🌾 What is the recommended fertilizer for paddy?</button>
+                    <button type="button" class="chip-btn" data-text="Tomato leaves are turning yellow, what should I do?" data-i18n="qf_2">🍅 Tomato leaves are turning yellow, what should I do?</button>
+                    <button type="button" class="chip-btn" data-text="What is the current mandi price for ragi?" data-i18n="qf_3">💰 What is the current mandi price for ragi?</button>
+                    <button type="button" class="chip-btn" data-text="Are drip irrigation pipes available?" data-i18n="qf_4">💧 Are drip irrigation pipes available?</button>
+                    <button type="button" class="chip-btn" data-text="What is the tractor rental rate per day?" data-i18n="qf_5">🚜 What is the tractor rental rate per day?</button>
+                    <button type="button" class="chip-btn" data-text="We need four workers for weeding tomorrow." data-i18n="qf_6">👷 We need four workers for weeding tomorrow.</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="{{ url_for('static', filename='js/farmer_translator.js') }}"></script>
+{% endblock %}
+

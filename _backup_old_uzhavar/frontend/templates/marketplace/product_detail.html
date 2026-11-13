@@ -1,0 +1,240 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ product.name }} – {{ t('app_name') }}{% endblock %}
+
+{% block content %}
+<div style="margin-bottom: 20px;">
+    <a href="{{ url_for('marketplace.index') }}" style="color: var(--primary-700); font-weight: 600;">
+        &larr; Back to Marketplace
+    </a>
+</div>
+
+<div class="dashboard-grid-2">
+    <!-- Left Column: Product Image & Details -->
+    <div>
+        <div class="card" style="margin-bottom: 24px; overflow: hidden;">
+            <div style="height: 380px; position: relative; background: #e2e8f0;">
+                <img src="{{ product.image_url }}" alt="{{ product.name }}" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.src='https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?auto=format&fit=crop&w=800&q=80'">
+                <span class="product-category-tag" style="top: 16px; left: 16px; font-size: 0.82rem; padding: 5px 14px;">
+                    {{ product.category_name }}
+                </span>
+            </div>
+
+            <div class="card-body">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 12px; margin-bottom: 12px;">
+                    <div>
+                        <h1 style="font-size: 1.8rem; font-weight: 800; color: var(--primary-900);">{{ product.name }}</h1>
+                        <div style="font-size: 0.9rem; color: var(--text-muted); display: flex; align-items: center; gap: 6px; margin-top: 4px;">
+                            <span>📍</span>
+                            <span>{{ product.harvest_location }}, {{ product.district }}, {{ product.state }}</span>
+                        </div>
+                    </div>
+                    <div style="text-align: right;">
+                        <div style="font-size: 2rem; font-weight: 800; color: var(--primary-800);">₹{{ product.price_per_unit }}</div>
+                        <div style="font-size: 0.85rem; color: var(--text-muted);">per {{ product.stock_unit }}</div>
+                    </div>
+                </div>
+
+                <!-- Stock & Harvest Info Chips -->
+                <div style="display: flex; flex-wrap: wrap; gap: 10px; margin: 16px 0 20px; padding: 14px; background: var(--primary-50); border-radius: var(--radius-md);">
+                    <div>
+                        <span style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; display: block;">Available Stock</span>
+                        <strong style="color: var(--primary-900);">{{ product.stock_quantity }} {{ product.stock_unit }}</strong>
+                    </div>
+                    <div style="border-left: 1px solid var(--primary-100); padding-left: 10px;">
+                        <span style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; display: block;">Harvest Date</span>
+                        <strong style="color: var(--primary-900);">{{ product.harvest_date or 'Recent Harvest' }}</strong>
+                    </div>
+                    <div style="border-left: 1px solid var(--primary-100); padding-left: 10px;">
+                        <span style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; display: block;">Status</span>
+                        <span class="badge badge-{{ product.status }}">{{ product.status }}</span>
+                    </div>
+                </div>
+
+                <!-- Description -->
+                <h4 style="font-size: 1rem; color: var(--primary-900); margin-bottom: 8px;">Product Description & Harvest Notes</h4>
+                <p style="color: var(--text-secondary); line-height: 1.6; font-size: 0.95rem; margin-bottom: 24px;">
+                    {{ product.description or 'Fresh farm harvest grown with traditional agronomic care, graded and packed for direct delivery.' }}
+                </p>
+
+                <!-- OpenStreetMap Farm Location Box -->
+                <h4 style="font-size: 1rem; color: var(--primary-900); margin-bottom: 8px;">Farm Location Map</h4>
+                <div id="farmMap" class="map-preview-box" style="margin-bottom: 24px;"></div>
+
+                <!-- Actions -->
+                <div style="display: flex; gap: 12px;">
+                    {% if product.status == 'active' and product.stock_quantity > 0 %}
+                    <a href="{{ url_for('buyer.checkout', product_id=product.id) }}" class="btn btn-primary btn-lg" style="flex: 2;">
+                        🛒 Proceed to Checkout & Order
+                    </a>
+                    {% else %}
+                    <button class="btn btn-outline btn-lg" disabled style="flex: 2; opacity: 0.6;">
+                        Out of Stock
+                    </button>
+                    {% endif %}
+
+                    {% if current_user %}
+                    <button id="wishlistBtn" onclick="toggleWishlist({{ product.id }})" class="btn btn-outline btn-lg" style="flex: 1;">
+                        {% if is_wishlisted %}❤️ Saved{% else %}🤍 Wishlist{% endif %}
+                    </button>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Customer Reviews & Ratings Section -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Buyer Reviews & Ratings</h3>
+                <div style="display: flex; align-items: center; gap: 6px;">
+                    <span style="color: var(--accent-amber); font-size: 1.2rem;">★</span>
+                    <strong style="font-size: 1.1rem;">{{ avg_rating }}</strong>
+                    <span style="color: var(--text-muted); font-size: 0.85rem;">({{ review_count }} reviews)</span>
+                </div>
+            </div>
+            <div class="card-body">
+                <!-- Submit Review Form for Logged In Users -->
+                {% if current_user %}
+                <form method="POST" action="{{ url_for('marketplace.submit_review', product_id=product.id) }}" style="background: #f8fafc; padding: 16px; border-radius: var(--radius-md); margin-bottom: 24px;">
+                    <h4 style="font-size: 0.95rem; margin-bottom: 10px; color: var(--primary-900);">Write a Verified Review (+10 Reward Points)</h4>
+                    <div style="display: flex; gap: 12px; align-items: center; margin-bottom: 12px;">
+                        <label style="font-size: 0.85rem; font-weight: 600;">Rating:</label>
+                        <select name="rating" class="form-control" style="width: auto;">
+                            <option value="5">★★★★★ (5 Stars - Excellent)</option>
+                            <option value="4">★★★★☆ (4 Stars - Very Good)</option>
+                            <option value="3">★★★☆☆ (3 Stars - Good)</option>
+                            <option value="2">★★☆☆☆ (2 Stars - Fair)</option>
+                            <option value="1">★☆☆☆☆ (1 Star - Poor)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <textarea name="comment" class="form-control" rows="2" placeholder="Share your experience regarding crop quality, moisture, freshness, and delivery..."></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-sm">Submit Review</button>
+                </form>
+                {% endif %}
+
+                <!-- Existing Reviews List -->
+                {% for r in reviews %}
+                <div style="padding: 14px 0; border-bottom: 1px solid var(--border-light);">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                        <strong>{{ r.reviewer_name }}</strong>
+                        <span style="color: var(--accent-amber); font-weight: 700;">
+                            {% for i in range(r.rating) %}★{% endfor %}
+                        </span>
+                    </div>
+                    <p style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 4px;">{{ r.comment }}</p>
+                    <span style="font-size: 0.75rem; color: var(--text-muted);">{{ r.created_at[:10] }}</span>
+                </div>
+                {% else %}
+                <p style="color: var(--text-muted); font-size: 0.9rem; text-align: center; padding: 20px;">
+                    No reviews yet. Be the first verified buyer to leave feedback!
+                </p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Column: Farmer Seller Profile & Related Crops -->
+    <div>
+        <!-- Farmer Contact Card -->
+        <div class="card" style="margin-bottom: 24px;">
+            <div class="card-header" style="background: var(--primary-50);">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 1.5rem;">👨‍🌾</span>
+                    <div>
+                        <h3 class="card-title" style="font-size: 1.05rem;">{{ product.farmer_name }}</h3>
+                        <span style="font-size: 0.75rem; color: #15803d; font-weight: 700;">✔ Verified Indian Farmer</span>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <div style="font-size: 0.88rem; color: var(--text-secondary); margin-bottom: 16px;">
+                    📍 {{ product.farmer_district }}, {{ product.farmer_state }}
+                    <br>
+                    {% if product.farm_size_acres %}
+                    🌾 Farm Area: <strong>{{ product.farm_size_acres }} Acres</strong>
+                    <br>
+                    {% endif %}
+                    {% if product.primary_crops %}
+                    🌱 Specializes in: <strong>{{ product.primary_crops }}</strong>
+                    <br>
+                    {% endif %}
+                    ⭐ Farmer Points: <strong>{{ product.farmer_points }} pts</strong>
+                </div>
+
+                {% if product.farmer_bio %}
+                <p style="font-size: 0.84rem; color: var(--text-muted); font-style: italic; margin-bottom: 16px; border-left: 2px solid var(--primary-600); padding-left: 8px;">
+                    "{{ product.farmer_bio }}"
+                </p>
+                {% endif %}
+
+                <div style="background: #f8fafc; padding: 12px; border-radius: var(--radius-md); text-align: center;">
+                    <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;">Direct Contact</div>
+                    <div style="font-size: 1.1rem; font-weight: 800; color: var(--primary-900); margin: 4px 0;">
+                        📞 {{ product.contact_phone }}
+                    </div>
+                    <a href="tel:{{ product.contact_phone }}" class="btn btn-outline btn-sm" style="width: 100%; margin-top: 6px;">
+                        Call Farmer Directly
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Related Crops -->
+        {% if related_products %}
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title" style="font-size: 1rem;">More {{ product.category_name }}</h3>
+            </div>
+            <div class="card-body" style="padding: 12px;">
+                {% for rp in related_products %}
+                <div style="display: flex; gap: 10px; margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px solid var(--border-light);">
+                    <img src="{{ rp.image_url }}" alt="{{ rp.name }}" style="width: 60px; height: 60px; border-radius: 6px; object-fit: cover;" onerror="this.src='https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?auto=format&fit=crop&w=200&q=80'">
+                    <div style="flex: 1;">
+                        <h4 style="font-size: 0.9rem; font-weight: 700; margin-bottom: 2px;">
+                            <a href="{{ url_for('marketplace.product_detail', product_id=rp.id) }}">{{ rp.name }}</a>
+                        </h4>
+                        <div style="font-size: 0.8rem; color: var(--primary-800); font-weight: 700;">₹{{ rp.price_per_unit }} / {{ rp.stock_unit }}</div>
+                        <div style="font-size: 0.75rem; color: var(--text-muted);">{{ rp.farmer_name }}</div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+{% block extra_scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    // Leaflet OpenStreetMap Initialization
+    const lat = {{ product.latitude or 11.1271 }};
+    const lng = {{ product.longitude or 78.6569 }};
+    const map = L.map('farmMap').setView([lat, lng], 11);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+
+    L.marker([lat, lng]).addTo(map)
+        .bindPopup("<b>{{ product.name }}</b><br>Harvested at {{ product.harvest_location }}")
+        .openPopup();
+});
+
+function toggleWishlist(productId) {
+    fetch(`/marketplace/wishlist/toggle/${productId}`, { method: 'POST' })
+        .then(res => res.json())
+        .then(data => {
+            const btn = document.getElementById('wishlistBtn');
+            if (data.wishlisted) {
+                btn.innerHTML = '❤️ Saved';
+            } else {
+                btn.innerHTML = '🤍 Wishlist';
+            }
+        });
+}
+</script>
+{% endblock %}
+{% endblock %}

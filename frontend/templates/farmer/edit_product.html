@@ -1,0 +1,106 @@
+{% extends 'base.html' %}
+
+{% block title %}Edit {{ product.name }} – {{ t('app_name') }}{% endblock %}
+
+{% block content %}
+<div style="max-width: 800px; margin: 20px auto;">
+    <div style="margin-bottom: 20px;">
+        <a href="{{ url_for('farmer.dashboard') }}" style="color: var(--primary-700); font-weight: 600;">
+            &larr; Back to Farmer Dashboard
+        </a>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h2 class="card-title">✏️ Edit Crop: {{ product.name }}</h2>
+            <span class="badge badge-{{ product.status }}">{{ product.status }}</span>
+        </div>
+        <div class="card-body">
+            <form method="POST" action="{{ url_for('farmer.edit_product', product_id=product.id) }}" enctype="multipart/form-data">
+                <div class="form-row">
+                    <div class="form-group" style="flex: 2;">
+                        <label class="form-label">Crop Name</label>
+                        <input type="text" name="name" class="form-control" value="{{ product.name }}" required>
+                    </div>
+                    <div class="form-group" style="flex: 1;">
+                        <label class="form-label">Category</label>
+                        <select name="category_id" class="form-control" required>
+                            {% for c in categories %}
+                            <option value="{{ c.id }}" {% if product.category_id == c.id %}selected{% endif %}>{{ c.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Price per Unit (₹)</label>
+                        <input type="number" step="0.01" name="price_per_unit" class="form-control" value="{{ product.price_per_unit }}" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Available Stock</label>
+                        <input type="number" step="0.1" name="stock_quantity" class="form-control" value="{{ product.stock_quantity }}" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Unit</label>
+                        <select name="stock_unit" class="form-control">
+                            <option value="quintal" {% if product.stock_unit == 'quintal' %}selected{% endif %}>Quintal</option>
+                            <option value="kg" {% if product.stock_unit == 'kg' %}selected{% endif %}>Kilogram</option>
+                            <option value="tonne" {% if product.stock_unit == 'tonne' %}selected{% endif %}>Tonne</option>
+                            <option value="bag" {% if product.stock_unit == 'bag' %}selected{% endif %}>Bag</option>
+                            <option value="crate" {% if product.stock_unit == 'crate' %}selected{% endif %}>Crate</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Crop Image (Leave empty to keep current image)</label>
+                    <input type="file" name="image" class="form-control" accept="image/*">
+                    <div style="margin-top: 8px;">
+                        <img src="{{ product.image_url }}" alt="Current Image" style="width: 80px; height: 80px; border-radius: 6px; object-fit: cover;">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Description</label>
+                    <textarea name="description" class="form-control" rows="3">{{ product.description or '' }}</textarea>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Harvest Location</label>
+                        <input type="text" name="harvest_location" class="form-control" value="{{ product.harvest_location }}" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">District</label>
+                        <input type="text" name="district" class="form-control" value="{{ product.district }}" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">State</label>
+                        <input type="text" name="state" class="form-control" value="{{ product.state }}" required>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Status</label>
+                        <select name="status" class="form-control">
+                            <option value="active" {% if product.status == 'active' %}selected{% endif %}>Active in Marketplace</option>
+                            <option value="sold_out" {% if product.status == 'sold_out' %}selected{% endif %}>Sold Out</option>
+                            <option value="pending" {% if product.status == 'pending' %}selected{% endif %}>Pending Review</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Harvest Date</label>
+                        <input type="date" name="harvest_date" class="form-control" value="{{ product.harvest_date or '' }}">
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-lg" style="width: 100%; margin-top: 10px;">
+                    Save Crop Changes &rarr;
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

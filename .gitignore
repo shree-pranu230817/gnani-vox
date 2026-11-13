@@ -1,0 +1,39 @@
+# Environment Variables & Secrets
+.env
+.env.local
+.env.*.local
+
+# Python Cache & Bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.pytest_cache/
+
+# Virtual Environments
+venv/
+env/
+ENV/
+.venv/
+
+# Database & SQLite files (Keep uzhavar.db if desired, or backup)
+*.sqlite3
+*.db-journal
+
+# Uploads & Temporary Media
+uploads/*
+!uploads/.gitkeep
+
+# IDE & Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS Generated Files
+.DS_Store
+Thumbs.db
+
+# Portable binaries & zips
+*.zip
+git_portable/

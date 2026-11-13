@@ -1,0 +1,205 @@
+{% extends 'base.html' %}
+
+{% block title %}Admin Dashboard – {{ t('app_name') }}{% endblock %}
+
+{% block content %}
+<div class="dashboard-header">
+    <div class="dashboard-title">
+        <h2>⚡ Admin Control Center</h2>
+        <p>System metrics, product approvals, order transactions, coupons, and reports</p>
+    </div>
+    <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+        <a href="{{ url_for('admin.users') }}" class="btn btn-outline btn-sm">👥 Users</a>
+        <a href="{{ url_for('admin.products') }}" class="btn btn-outline btn-sm">🌾 Products</a>
+        <a href="{{ url_for('admin.orders') }}" class="btn btn-outline btn-sm">📦 Orders</a>
+        <a href="{{ url_for('admin.coupons') }}" class="btn btn-outline btn-sm">🏷️ Coupons</a>
+        <a href="{{ url_for('admin.reports') }}" class="btn btn-outline btn-sm">📊 Reports</a>
+    </div>
+</div>
+
+<!-- Admin Metrics Row -->
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-icon-box stat-icon-green">🚜</div>
+        <div class="stat-details">
+            <h4>Total Farmers</h4>
+            <div class="stat-value">{{ stats.farmers }}</div>
+        </div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-icon-box stat-icon-blue">🛒</div>
+        <div class="stat-details">
+            <h4>Total Buyers</h4>
+            <div class="stat-value">{{ stats.buyers }}</div>
+        </div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-icon-box stat-icon-gold">⏳</div>
+        <div class="stat-details">
+            <h4>Pending Approvals</h4>
+            <div class="stat-value" style="color: #d97706;">{{ stats.pending }}</div>
+        </div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-icon-box stat-icon-purple">💰</div>
+        <div class="stat-details">
+            <h4>Total Revenue</h4>
+            <div class="stat-value">₹{{ "{:,.2f}".format(stats.revenue) }}</div>
+        </div>
+    </div>
+</div>
+
+<div class="dashboard-grid-2">
+    <!-- Pending Product Approvals Queue -->
+    <div>
+        <div class="card" style="margin-bottom: 24px;">
+            <div class="card-header">
+                <h3 class="card-title">Pending Crop Approvals Queue</h3>
+                <span class="badge badge-pending">{{ pending_products|length }} Pending</span>
+            </div>
+            <div class="card-body" style="padding: 0;">
+                <div class="table-responsive">
+                    <table class="custom-table" style="font-size: 0.88rem;">
+                        <thead>
+                            <tr>
+                                <th>Crop</th>
+                                <th>Farmer</th>
+                                <th>Price & Stock</th>
+                                <th>Location</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for p in pending_products %}
+                            <tr>
+                                <td>
+                                    <strong>{{ p.name }}</strong>
+                                    <div style="font-size: 0.72rem; color: var(--text-muted);">{{ p.category_name }}</div>
+                                </td>
+                                <td>{{ p.farmer_name }}</td>
+                                <td>₹{{ p.price_per_unit }} ({{ p.stock_quantity }} {{ p.stock_unit }})</td>
+                                <td>{{ p.district }}, {{ p.state }}</td>
+                                <td>
+                                    <div style="display: flex; gap: 4px;">
+                                        <form method="POST" action="{{ url_for('admin.approve_product', product_id=p.id) }}">
+                                            <button type="submit" class="btn btn-primary btn-sm" style="padding: 4px 8px; font-size: 0.75rem;">
+                                                ✔ Approve
+                                            </button>
+                                        </form>
+                                        <form method="POST" action="{{ url_for('admin.reject_product', product_id=p.id) }}">
+                                            <button type="submit" class="btn btn-outline btn-sm" style="padding: 4px 8px; font-size: 0.75rem; color: #dc2626; border-color: #fca5a5;">
+                                                ✕ Reject
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="5" style="text-align: center; padding: 24px; color: var(--text-muted);">
+                                    No pending approvals. All crop listings are reviewed!
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Marketplace Orders -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Recent Orders & Transactions</h3>
+                <a href="{{ url_for('admin.orders') }}" class="btn btn-outline btn-sm">View All</a>
+            </div>
+            <div class="card-body" style="padding: 0;">
+                <div class="table-responsive">
+                    <table class="custom-table" style="font-size: 0.88rem;">
+                        <thead>
+                            <tr>
+                                <th>Order #</th>
+                                <th>Buyer</th>
+                                <th>Farmer</th>
+                                <th>Amount</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for o in recent_orders %}
+                            <tr>
+                                <td><strong>{{ o.order_number }}</strong></td>
+                                <td>{{ o.buyer_name }}</td>
+                                <td>{{ o.farmer_name }}</td>
+                                <td style="font-weight: 700; color: var(--primary-800);">₹{{ o.final_amount }}</td>
+                                <td><span class="badge badge-{{ o.status }}">{{ o.status }}</span></td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Column: Crop Distribution Chart -->
+    <div>
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Crops by Category</h3>
+            </div>
+            <div class="card-body">
+                <div style="position: relative; height: 260px;">
+                    <canvas id="categoryChart"></canvas>
+                </div>
+
+                <div style="margin-top: 20px;">
+                    <h4 style="font-size: 0.9rem; margin-bottom: 10px; color: var(--primary-900);">Quick System Links</h4>
+                    <div style="display: flex; flex-direction: column; gap: 8px;">
+                        <a href="{{ url_for('admin.users') }}" class="btn btn-outline btn-sm" style="text-align: left; justify-content: flex-start;">
+                            👥 User Management ({{ stats.farmers + stats.buyers }} Users)
+                        </a>
+                        <a href="{{ url_for('admin.coupons') }}" class="btn btn-outline btn-sm" style="text-align: left; justify-content: flex-start;">
+                            🏷️ Create Discount Coupons
+                        </a>
+                        <a href="{{ url_for('admin.reports') }}" class="btn btn-outline btn-sm" style="text-align: left; justify-content: flex-start;">
+                            📊 Daily Revenue & Crop Analytics
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const ctx = document.getElementById('categoryChart');
+    if (!ctx) return;
+
+    const labels = [{% for c in category_counts %}'{{ c.name }}',{% endfor %}];
+    const data = [{% for c in category_counts %}{{ c.product_count }},{% endfor %}];
+
+    new Chart(ctx, {
+        type: 'pie',
+        data: {
+            labels: labels,
+            datasets: [{
+                data: data,
+                backgroundColor: ['#1b5e20', '#2e7d32', '#43a047', '#f59e0b', '#3b82f6', '#8b5cf6', '#06b6d4', '#64748b']
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10 } } }
+            }
+        }
+    });
+});
+</script>
+{% endblock %}

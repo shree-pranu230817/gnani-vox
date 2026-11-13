@@ -1,0 +1,288 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ t('ai_farming_assistant') }} – {{ t('ai_farming_assistant_tagline') }}{% endblock %}
+
+{% block content %}
+<div class="container" style="padding-top: 24px; padding-bottom: 50px;">
+    <!-- Breadcrumb -->
+    <div style="font-size: 0.88rem; color: var(--text-muted); margin-bottom: 16px;">
+        <a href="{{ url_for('main.index') }}" style="color: var(--primary-700); text-decoration: none;">🏠 {{ t('home') }}</a>
+        <span> &rsaquo; </span>
+        <span style="color: var(--primary-900); font-weight: 600;">{{ t('ai_farming_assistant') }}</span>
+    </div>
+
+    <!-- Re-use the interactive farming assistant card -->
+    <section class="farming-assistant-card-section" style="margin-bottom: 36px;">
+        <div class="farming-card-container" id="farmingCardContainer">
+            <!-- Header -->
+            <div class="farming-card-header">
+                <div class="farming-card-title-group">
+                    <div class="farming-badge-pill">
+                        <span>🌱 3RD MAIN SERVICE</span>
+                        <span>•</span>
+                        <span>AI BACKEND CONNECTED</span>
+                    </div>
+                    <h1 class="farming-card-title">
+                        <span>{{ t('ai_farming_assistant') }}</span>
+                        <span class="tagline-accent">– {{ t('ai_farming_assistant_tagline') }}</span>
+                    </h1>
+                    <p class="farming-card-desc">
+                        {{ t('ai_farming_assistant_desc') }}
+                    </p>
+                </div>
+
+                <div class="farming-card-actions">
+                    <!-- Language Selector -->
+                    <select id="farmingCardLang" class="farming-lang-dropdown" title="Select Preferred Language">
+                        {% for code, lang_info in languages.items() %}
+                        <option value="{{ code }}" {% if current_lang == code %}selected{% endif %}>
+                            {{ lang_info.flag }} {{ lang_info.native }} ({{ lang_info.name }})
+                        </option>
+                        {% endfor %}
+                    </select>
+
+                    <!-- Clear Conversation Button -->
+                    <button id="farmingCardClearBtn" class="btn-clear-chat" title="Clear conversation memory & start fresh">
+                        <span>🔄</span>
+                        <span>Clear Conversation</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- 13 Supported Topics Filter Pills -->
+            <div class="farming-topics-wrapper">
+                <div class="farming-topics-label">
+                    <span>🌾 Explore Agricultural Domains (Tap to ask):</span>
+                </div>
+                <div class="farming-topics-pills">
+                    <button type="button" class="topic-pill" data-sample="What are best cultivation practices for high yield in paddy?">🌱 Crop Cultivation & Management</button>
+                    <button type="button" class="topic-pill" data-sample="Which certified seed varieties are recommended for my region?">🌾 Seed Selection</button>
+                    <button type="button" class="topic-pill" data-sample="What fertilizer and NPK dosage should I apply for nutrient deficiency?">🧪 Fertilizers & Nutrients</button>
+                    <button type="button" class="topic-pill" data-sample="What is the ideal drip irrigation schedule in hot summer?">💧 Irrigation & Water Management</button>
+                    <button type="button" class="topic-pill" data-sample="How to improve soil organic carbon and prepare clay soil?">🟫 Soil Health & Preparation</button>
+                    <button type="button" class="topic-pill" data-sample="My tomato leaves have yellow spots and curling. What disease is this?">🦠 Crop Diseases</button>
+                    <button type="button" class="topic-pill" data-sample="How to control yellow stem borer in paddy without damaging pollinators?">🐛 Pest Identification & Management</button>
+                    <button type="button" class="topic-pill" data-sample="How to prepare authentic Jeevamrutha and Panchagavya organic spray?">🌿 Organic Farming</button>
+                    <button type="button" class="topic-pill" data-sample="What are effective weed management practices for sugarcane?">🌾 Weed Management</button>
+                    <button type="button" class="topic-pill" data-sample="How to store grains safely to prevent weevil and moisture rot?">📦 Harvesting & Storage</button>
+                    <button type="button" class="topic-pill" data-sample="What weather precautions should I take during heavy unseasonal rain?">⛅ Weather Precautions</button>
+                    <button type="button" class="topic-pill" data-sample="Which small-scale tractor or power weeder is best for 2 acres?">🚜 Agricultural Equipment</button>
+                    <button type="button" class="topic-pill" data-sample="What are sustainable crop rotation practices to conserve water?">♻️ Sustainable Farming</button>
+                </div>
+            </div>
+
+            <!-- Main Input Bar -->
+            <div class="farming-input-bar">
+                <!-- Microphone button -->
+                <button id="farmingCardMicBtn" type="button" class="card-mic-btn" title="Tap to Speak using Gnani Prisma STT">
+                    <span>🎙️</span>
+                    <span>Speak</span>
+                </button>
+
+                <!-- Text question input -->
+                <input type="text" id="farmingCardInput" class="card-text-input" placeholder="Type agricultural question... (e.g., How to treat yellow stem borer in paddy? What fertilizer for black soil?)" autocomplete="off">
+
+                <!-- Submit question button -->
+                <button id="farmingCardSubmitBtn" type="button" class="card-submit-btn" title="Submit Question to AI Backend">
+                    <span>Ask AI</span>
+                    <span>➤</span>
+                </button>
+            </div>
+
+            <!-- Live Recording Status Indicator -->
+            <div id="farmingCardMicStatus" class="card-mic-status-bar" style="display: none;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span class="mic-wave-dots">
+                        <span></span><span></span><span></span>
+                    </span>
+                    <span id="farmingCardMicStatusText">🎙️ Listening via Gnani Prisma... Speak your farming question now.</span>
+                </div>
+                <button type="button" onclick="window.farmingAssistantCard.stopVoiceRecording()" style="background: none; border: none; color: #dc2626; font-weight: 700; cursor: pointer;">✕ Stop</button>
+            </div>
+
+            <!-- Answer Display Area -->
+            <div class="farming-answer-area">
+                <!-- Initial State: Prompt Suggestions -->
+                <div id="farmingCardInitialState" class="farming-initial-welcome">
+                    <h4>🌾 Welcome to Your AI Farming Advisor</h4>
+                    <p>Ask anything about seeds, soil preparation, pest remedies, drip timing, or organic concoctions. Responses are grounded in ICAR and State Agricultural University scientific packages of practice.</p>
+                    <div class="suggested-prompts-row">
+                        <button type="button" class="suggested-prompt-chip" data-prompt="What fertilizer is recommended for paddy in Cauvery delta clay soil?">
+                            🌾 Paddy Fertilizer in Clay Soil
+                        </button>
+                        <button type="button" class="suggested-prompt-chip" data-prompt="How to prepare and apply Panchagavya organic fertilizer step-by-step?">
+                            🌿 Panchagavya Organic Recipe
+                        </button>
+                        <button type="button" class="suggested-prompt-chip" data-prompt="White powdery spots on tomato leaves. How to diagnose and treat it?">
+                            🍅 Powdery Mildew in Tomatoes
+                        </button>
+                        <button type="button" class="suggested-prompt-chip" data-prompt="What drip irrigation schedule is best for cotton during summer?">
+                            💧 Drip Irrigation for Cotton
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Loading State -->
+                <div id="farmingCardLoadingState" class="farming-loading-card" style="display: none;">
+                    <div class="loading-spinner-agri"></div>
+                    <h4 style="color: #14532d; font-weight: 700; margin-bottom: 6px;">Consulting Agricultural Knowledge Base...</h4>
+                    <p id="farmingLoadingStepText" style="color: #166534; font-size: 0.9rem; margin-bottom: 12px;">Analyzing query with Google Gemini & agronomy models...</p>
+                    <div class="loading-pipeline-steps">
+                        <span class="pipeline-step-badge active" id="farmingStepPrisma">1. 🎙️ Prisma (Voice Input)</span>
+                        <span class="pipeline-step-badge active" id="farmingStepGemini">2. 🧠 Gemini (Agri Reasoning)</span>
+                        <span class="pipeline-step-badge" id="farmingStepTimbre">3. 🔊 Timbre (Spoken Answer)</span>
+                    </div>
+                </div>
+
+                <!-- Answer State -->
+                <div id="farmingCardAnswerState" class="farming-response-card" style="display: none;">
+                    <!-- Meta tags row -->
+                    <div class="response-meta-row">
+                        <div class="response-badges-left">
+                            <span id="farmingBadgeCategory" class="badge-topic-tag">📂 Crop Management</span>
+                            <span id="farmingBadgeEngine" class="badge-engine-tag">⚡ Google Gemini AI</span>
+                            <span id="farmingBadgeContext" class="badge-context-tag" style="display: none;">🌾 Active Farm Context</span>
+                        </div>
+                    </div>
+
+                    <!-- Formatted Answer Text Content -->
+                    <div id="farmingAnswerContent" class="response-body-content"></div>
+
+                    <!-- Safety Advisory Callout -->
+                    <div class="safety-advisory-box">
+                        <strong>⚠️ Agricultural Safety Notice:</strong> Always check chemical fertilizer and pesticide packaging labels for verified dosage and protective safety gear. Consult your local Krishi Vigyan Kendra (KVK) or Block Agricultural Officer for site-specific soil suitability.
+                    </div>
+
+                    <!-- Audio Playback Row -->
+                    <div class="response-audio-bar">
+                        <button id="farmingPlayAudioBtn" type="button" class="btn-play-audio">
+                            <span>🔊</span>
+                            <span>Listen to Answer (Gnani Timbre)</span>
+                        </button>
+                        <div id="farmingAudioVisualizer" class="audio-playing-indicator" style="display: none;">
+                            <span class="audio-bars-anim">
+                                <span></span><span></span><span></span><span></span>
+                            </span>
+                            <span>Gnani Timbre Voice Playing...</span>
+                        </div>
+                    </div>
+
+                    <!-- Follow-up Question Input Area -->
+                    <div class="farming-followup-area">
+                        <div class="followup-header">
+                            <span>💬 Ask Follow-up Question (Context Preserved):</span>
+                            <span style="font-size: 0.76rem; color: #64748b; font-weight: normal;">Remembers previous crop, soil & topic</span>
+                        </div>
+                        <div class="followup-input-group">
+                            <button id="farmingFollowupMicBtn" type="button" class="card-mic-btn-sm" title="Speak Follow-up">🎙️</button>
+                            <input type="text" id="farmingFollowupInput" class="card-followup-input" placeholder="Ask follow-up (e.g., 'What about organic alternative?' or 'How often should I spray?')...">
+                            <button id="farmingFollowupSubmitBtn" type="button" class="card-followup-btn">Ask Follow-up ➤</button>
+                        </div>
+                    </div>
+
+                    <!-- History Drawer -->
+                    <div id="farmingHistoryDrawer" class="farming-history-drawer" style="display: none;">
+                        <button id="farmingHistoryToggleBtn" type="button" class="history-toggle-btn">
+                            ▼ View Consultation History
+                        </button>
+                        <div id="farmingHistoryList" class="history-turns-list" style="display: none;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 13 Agricultural Topics Overview Grid -->
+    <section>
+        <div style="text-align: center; max-width: 700px; margin: 0 auto 30px;">
+            <h2 style="font-size: 1.5rem; font-weight: 800; color: var(--primary-900); margin-bottom: 8px;">
+                Supported Agricultural Knowledge Domains
+            </h2>
+            <p style="font-size: 0.92rem; color: var(--text-secondary);">
+                Every answer follows ICAR agronomy guidelines and university package of practices (TNAU, UAS, PJTSAU, PAU).
+            </p>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 18px;">
+            <div class="card" style="padding: 20px;">
+                <div style="font-size: 1.8rem; margin-bottom: 8px;">🌱</div>
+                <h4 style="font-size: 1.05rem; font-weight: 700; color: var(--primary-900); margin-bottom: 6px;">Crop Cultivation & Management</h4>
+                <p style="font-size: 0.85rem; color: var(--text-secondary);">Spacing, sowing methods, nursery management, transplanting, and lifecycle agronomy for all major crops.</p>
+            </div>
+
+            <div class="card" style="padding: 20px;">
+                <div style="font-size: 1.8rem; margin-bottom: 8px;">🌾</div>
+                <h4 style="font-size: 1.05rem; font-weight: 700; color: var(--primary-900); margin-bottom: 6px;">Seed Selection & Varieties</h4>
+                <p style="font-size: 0.85rem; color: var(--text-secondary);">High-yielding certified varieties, drought/flood-tolerant hybrids, seed treatment rates, and germination tests.</p>
+            </div>
+
+            <div class="card" style="padding: 20px;">
+                <div style="font-size: 1.8rem; margin-bottom: 8px;">🧪</div>
+                <h4 style="font-size: 1.05rem; font-weight: 700; color: var(--primary-900); margin-bottom: 6px;">Fertilizers & Nutrients</h4>
+                <p style="font-size: 0.85rem; color: var(--text-secondary);">Basal and split top-dressing schedules for Urea, DAP, MOP, Zinc, Boron, and micronutrient deficiency cures.</p>
+            </div>
+
+            <div class="card" style="padding: 20px;">
+                <div style="font-size: 1.8rem; margin-bottom: 8px;">💧</div>
+                <h4 style="font-size: 1.05rem; font-weight: 700; color: var(--primary-900); margin-bottom: 6px;">Irrigation & Water Management</h4>
+                <p style="font-size: 0.85rem; color: var(--text-secondary);">Drip emitter spacing, alternate wetting and drying (AWD), sprinkler timing, and critical moisture growth stages.</p>
+            </div>
+
+            <div class="card" style="padding: 20px;">
+                <div style="font-size: 1.8rem; margin-bottom: 8px;">🟫</div>
+                <h4 style="font-size: 1.05rem; font-weight: 700; color: var(--primary-900); margin-bottom: 6px;">Soil Health & Preparation</h4>
+                <p style="font-size: 0.85rem; color: var(--text-secondary);">Deep summer ploughing, green manure crops (dhaincha, sunnhemp), soil pH correction, and organic carbon enrichment.</p>
+            </div>
+
+            <div class="card" style="padding: 20px;">
+                <div style="font-size: 1.8rem; margin-bottom: 8px;">🦠</div>
+                <h4 style="font-size: 1.05rem; font-weight: 700; color: var(--primary-900); margin-bottom: 6px;">Crop Diseases & Diagnosis</h4>
+                <p style="font-size: 0.85rem; color: var(--text-secondary);">Bacterial leaf blight, sheath rot, blast, powdery mildew, wilt, and viral mosaic symptom differentiation.</p>
+            </div>
+
+            <div class="card" style="padding: 20px;">
+                <div style="font-size: 1.8rem; margin-bottom: 8px;">🐛</div>
+                <h4 style="font-size: 1.05rem; font-weight: 700; color: var(--primary-900); margin-bottom: 6px;">Pest Management (IPM)</h4>
+                <p style="font-size: 0.85rem; color: var(--text-secondary);">Pheromone traps, light traps, neem oil biocontrol, Trichogramma cards, and approved selective pesticides.</p>
+            </div>
+
+            <div class="card" style="padding: 20px;">
+                <div style="font-size: 1.8rem; margin-bottom: 8px;">🌿</div>
+                <h4 style="font-size: 1.05rem; font-weight: 700; color: var(--primary-900); margin-bottom: 6px;">Organic Farming Inputs</h4>
+                <p style="font-size: 0.85rem; color: var(--text-secondary);">Step-by-step preparation of Jeevamrutha, Ghana Jeevamrutha, Panchagavya, Beejamrutha, and Agniastra.</p>
+            </div>
+
+            <div class="card" style="padding: 20px;">
+                <div style="font-size: 1.8rem; margin-bottom: 8px;">🌾</div>
+                <h4 style="font-size: 1.05rem; font-weight: 700; color: var(--primary-900); margin-bottom: 6px;">Weed Management</h4>
+                <p style="font-size: 0.85rem; color: var(--text-secondary);">Cono-weeder mechanical weeding, mulching, pre-emergence and post-emergence herbicide safety guidelines.</p>
+            </div>
+
+            <div class="card" style="padding: 20px;">
+                <div style="font-size: 1.8rem; margin-bottom: 8px;">📦</div>
+                <h4 style="font-size: 1.05rem; font-weight: 700; color: var(--primary-900); margin-bottom: 6px;">Harvesting & Storage</h4>
+                <p style="font-size: 0.85rem; color: var(--text-secondary);">Grain moisture benchmarks (12-14%), hermetic storage bags (PICS), cold storage tips, and warehouse protection.</p>
+            </div>
+
+            <div class="card" style="padding: 20px;">
+                <div style="font-size: 1.8rem; margin-bottom: 8px;">⛅</div>
+                <h4 style="font-size: 1.05rem; font-weight: 700; color: var(--primary-900); margin-bottom: 6px;">Weather Precautions</h4>
+                <p style="font-size: 0.85rem; color: var(--text-secondary);">Unseasonal cyclonic rainfall drainage, heat wave mulching, frost protection, and hail damage mitigation.</p>
+            </div>
+
+            <div class="card" style="padding: 20px;">
+                <div style="font-size: 1.8rem; margin-bottom: 8px;">🚜</div>
+                <h4 style="font-size: 1.05rem; font-weight: 700; color: var(--primary-900); margin-bottom: 6px;">Agri Equipment & Machinery</h4>
+                <p style="font-size: 0.85rem; color: var(--text-secondary);">Custom Hiring Centers (CHC), power tillers, seed drills, drone spraying protocols, and laser land levellers.</p>
+            </div>
+
+            <div class="card" style="padding: 20px;">
+                <div style="font-size: 1.8rem; margin-bottom: 8px;">♻️</div>
+                <h4 style="font-size: 1.05rem; font-weight: 700; color: var(--primary-900); margin-bottom: 6px;">Sustainable Farming</h4>
+                <p style="font-size: 0.85rem; color: var(--text-secondary);">Legume crop rotation, zero tillage, agro-forestry, solar pump integration, and farm pond rainwater harvesting.</p>
+            </div>
+        </div>
+    </section>
+</div>
+{% endblock %}
+

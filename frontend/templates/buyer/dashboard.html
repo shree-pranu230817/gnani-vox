@@ -1,0 +1,136 @@
+{% extends 'base.html' %}
+
+{% block title %}Buyer Dashboard – {{ t('app_name') }}{% endblock %}
+
+{% block content %}
+<div class="dashboard-header">
+    <div class="dashboard-title">
+        <h2>📦 Buyer Portal: {{ buyer.full_name }}</h2>
+        <p>Track your farm orders, view delivery status, and review purchased crops</p>
+    </div>
+    <a href="{{ url_for('marketplace.index') }}" class="btn btn-primary">
+        🛒 {{ t('browse_crops') }}
+    </a>
+</div>
+
+<!-- Stats Row -->
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-icon-box stat-icon-blue">📦</div>
+        <div class="stat-details">
+            <h4>Total Orders</h4>
+            <div class="stat-value">{{ total_orders }}</div>
+        </div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-icon-box stat-icon-green">🚚</div>
+        <div class="stat-details">
+            <h4>Active Deliveries</h4>
+            <div class="stat-value">{{ active_deliveries }}</div>
+        </div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-icon-box stat-icon-gold">💰</div>
+        <div class="stat-details">
+            <h4>Total Spent</h4>
+            <div class="stat-value">₹{{ "{:,.2f}".format(total_spent) }}</div>
+        </div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-icon-box stat-icon-purple">⭐</div>
+        <div class="stat-details">
+            <h4>Reward Points</h4>
+            <div class="stat-value">{{ buyer.reward_points }}</div>
+        </div>
+    </div>
+</div>
+
+<!-- Orders Table -->
+<div class="card" style="margin-bottom: 30px;">
+    <div class="card-header">
+        <h3 class="card-title">My Orders & Live Tracking</h3>
+    </div>
+    <div class="card-body" style="padding: 0;">
+        <div class="table-responsive">
+            <table class="custom-table">
+                <thead>
+                    <tr>
+                        <th>Order #</th>
+                        <th>Farmer Seller</th>
+                        <th>Amount</th>
+                        <th>Payment</th>
+                        <th>Delivery Status</th>
+                        <th>Placed On</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for o in orders %}
+                    <tr>
+                        <td><strong>{{ o.order_number }}</strong></td>
+                        <td>
+                            <div>{{ o.farmer_name }}</div>
+                            <div style="font-size: 0.75rem; color: var(--text-muted);">📞 {{ o.farmer_mobile }}</div>
+                        </td>
+                        <td style="font-weight: 700; color: var(--primary-800);">₹{{ o.final_amount }}</td>
+                        <td>
+                            <span class="badge badge-{{ o.payment_status }}">{{ o.payment_status }}</span>
+                        </td>
+                        <td>
+                            <span class="badge badge-{{ o.status }}">{{ o.status }}</span>
+                        </td>
+                        <td style="color: var(--text-muted); font-size: 0.8rem;">{{ o.created_at[:10] }}</td>
+                        <td>
+                            <a href="{{ url_for('buyer.order_detail', order_id=o.id) }}" class="btn btn-outline btn-sm">
+                                Track Order &rarr;
+                            </a>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="7" style="text-align: center; padding: 24px; color: var(--text-muted);">
+                            You haven't placed any orders yet. Visit our <a href="{{ url_for('marketplace.index') }}" style="font-weight: 700;">Marketplace</a> to buy directly from farmers!
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Wishlist Items -->
+{% if wishlist_items %}
+<div class="card">
+    <div class="card-header">
+        <h3 class="card-title">❤️ My Saved Wishlist Crops</h3>
+    </div>
+    <div class="card-body">
+        <div class="product-grid">
+            {% for prod in wishlist_items %}
+            <div class="product-card">
+                <div class="product-image-box" style="height: 140px;">
+                    <img src="{{ prod.image_url }}" alt="{{ prod.name }}" class="product-img" onerror="this.src='https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?auto=format&fit=crop&w=300&q=80'">
+                </div>
+                <div class="product-content">
+                    <h4 class="product-title" style="font-size: 1rem;">{{ prod.name }}</h4>
+                    <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 8px;">
+                        Farmer: {{ prod.farmer_name }}
+                    </div>
+                    <div class="product-pricing">
+                        <div class="price-main" style="font-size: 1.15rem;">₹{{ prod.price_per_unit }}</div>
+                        <a href="{{ url_for('marketplace.product_detail', product_id=prod.id) }}" class="btn btn-primary btn-sm">
+                            View Crop
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,760 @@
+/* ==============================================================================
+   UZHAVAR AI - AI FARMING ASSISTANT (THIRD MAIN SERVICE) STYLESHEET
+   Ask Anything About Agriculture - Responsive, High-Contrast Farm UI
+   ============================================================================== */
+
+.farming-assistant-card-section {
+    margin-bottom: 50px;
+}
+
+.farming-card-container {
+    background: linear-gradient(135deg, #ffffff 0%, #f0fdf4 100%);
+    border: 2px solid #86efac;
+    border-radius: var(--radius-lg, 16px);
+    padding: 32px 36px;
+    box-shadow: 0 10px 30px rgba(22, 101, 52, 0.08), 0 2px 8px rgba(0, 0, 0, 0.04);
+    position: relative;
+    overflow: hidden;
+}
+
+.farming-card-container::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 6px;
+    background: linear-gradient(90deg, #16a34a, #10b981, #eab308, #16a34a);
+}
+
+/* Card Header */
+.farming-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 20px;
+    margin-bottom: 24px;
+    border-bottom: 1px solid rgba(22, 101, 52, 0.12);
+    padding-bottom: 20px;
+}
+
+.farming-card-title-group {
+    max-width: 750px;
+}
+
+.farming-badge-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #14532d;
+    color: #ffffff;
+    padding: 4px 14px;
+    border-radius: 9999px;
+    font-size: 0.8rem;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+}
+
+.farming-card-title {
+    font-size: 1.85rem;
+    font-weight: 800;
+    color: #14532d;
+    line-height: 1.25;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.farming-card-title .tagline-accent {
+    color: #15803d;
+    font-weight: 600;
+    font-size: 1.25rem;
+}
+
+.farming-card-desc {
+    font-size: 1.02rem;
+    color: #166534;
+    line-height: 1.55;
+    margin-bottom: 0;
+}
+
+/* Header Action Controls */
+.farming-card-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.farming-lang-dropdown {
+    padding: 8px 14px;
+    border-radius: 9999px;
+    border: 1.5px solid #86efac;
+    background: #ffffff;
+    font-weight: 600;
+    color: #166534;
+    font-size: 0.9rem;
+    cursor: pointer;
+    outline: none;
+    transition: all 0.2s;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+}
+
+.farming-lang-dropdown:focus {
+    border-color: #16a34a;
+    box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.2);
+}
+
+.btn-clear-chat {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #ffffff;
+    border: 1.5px solid #cbd5e1;
+    color: #475569;
+    padding: 8px 16px;
+    border-radius: 9999px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-clear-chat:hover {
+    background: #fee2e2;
+    border-color: #fca5a5;
+    color: #b91c1c;
+}
+
+/* Supported Topic Pills Carousel */
+.farming-topics-wrapper {
+    margin-bottom: 24px;
+}
+
+.farming-topics-label {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: #15803d;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.farming-topics-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.topic-pill {
+    background: #ffffff;
+    border: 1px solid #bbf7d0;
+    color: #166534;
+    padding: 6px 13px;
+    border-radius: 20px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.topic-pill:hover {
+    background: #dcfce7;
+    border-color: #4ade80;
+    color: #14532d;
+    transform: translateY(-1px);
+    box-shadow: 0 3px 8px rgba(22, 101, 52, 0.1);
+}
+
+/* Main Input Bar */
+.farming-input-bar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: #ffffff;
+    border: 2px solid #86efac;
+    border-radius: 14px;
+    padding: 8px 12px;
+    box-shadow: 0 4px 16px rgba(22, 101, 52, 0.08);
+    transition: border-color 0.2s, box-shadow 0.2s;
+    margin-bottom: 12px;
+}
+
+.farming-input-bar:focus-within {
+    border-color: #16a34a;
+    box-shadow: 0 4px 20px rgba(22, 163, 74, 0.18);
+}
+
+.card-mic-btn {
+    background: linear-gradient(135deg, #15803d, #166534);
+    color: #ffffff;
+    border: none;
+    border-radius: 10px;
+    padding: 10px 16px;
+    font-size: 0.95rem;
+    font-weight: 700;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s;
+    flex-shrink: 0;
+}
+
+.card-mic-btn:hover {
+    background: #14532d;
+    transform: scale(1.02);
+}
+
+.card-mic-btn.recording {
+    background: #dc2626 !important;
+    animation: micPulse 1.2s infinite;
+}
+
+@keyframes micPulse {
+    0% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.6); }
+    70% { box-shadow: 0 0 0 14px rgba(220, 38, 38, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0); }
+}
+
+.card-text-input {
+    flex: 1;
+    border: none;
+    outline: none;
+    font-size: 1.05rem;
+    color: #1e293b;
+    padding: 8px 4px;
+    background: transparent;
+    font-family: inherit;
+}
+
+.card-text-input::placeholder {
+    color: #94a3b8;
+    font-size: 0.95rem;
+}
+
+.card-submit-btn {
+    background: linear-gradient(135deg, #16a34a, #15803d);
+    color: #ffffff;
+    border: none;
+    border-radius: 10px;
+    padding: 10px 22px;
+    font-size: 0.98rem;
+    font-weight: 700;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s;
+    flex-shrink: 0;
+    box-shadow: 0 2px 8px rgba(22, 163, 74, 0.3);
+}
+
+.card-submit-btn:hover {
+    background: #14532d;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(22, 163, 74, 0.4);
+}
+
+/* Live Recording Status Bar */
+.card-mic-status-bar {
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    color: #991b1b;
+    border-radius: 10px;
+    padding: 10px 16px;
+    font-size: 0.88rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+    animation: fadeIn 0.3s;
+}
+
+.mic-wave-dots {
+    display: inline-flex;
+    gap: 4px;
+}
+
+.mic-wave-dots span {
+    width: 6px;
+    height: 6px;
+    background: #dc2626;
+    border-radius: 50%;
+    animation: waveBounce 0.8s infinite alternate;
+}
+
+.mic-wave-dots span:nth-child(2) { animation-delay: 0.2s; }
+.mic-wave-dots span:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes waveBounce {
+    from { transform: translateY(0); }
+    to { transform: translateY(-8px); }
+}
+
+/* Answer Display Area */
+.farming-answer-area {
+    margin-top: 20px;
+}
+
+/* Initial Welcome / Prompt Suggestions */
+.farming-initial-welcome {
+    background: #ffffff;
+    border: 1px dashed #86efac;
+    border-radius: 14px;
+    padding: 22px 24px;
+    text-align: center;
+}
+
+.farming-initial-welcome h4 {
+    color: #14532d;
+    font-size: 1.15rem;
+    font-weight: 700;
+    margin-bottom: 8px;
+}
+
+.farming-initial-welcome p {
+    color: #166534;
+    font-size: 0.92rem;
+    max-width: 650px;
+    margin: 0 auto 16px;
+}
+
+.suggested-prompts-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
+}
+
+.suggested-prompt-chip {
+    background: #f0fdf4;
+    border: 1px solid #bbf7d0;
+    color: #15803d;
+    padding: 7px 14px;
+    border-radius: 20px;
+    font-size: 0.84rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: left;
+}
+
+.suggested-prompt-chip:hover {
+    background: #dcfce7;
+    border-color: #22c55e;
+    color: #14532d;
+    transform: translateY(-1px);
+}
+
+/* Loading Pipeline State */
+.farming-loading-card {
+    background: #ffffff;
+    border: 1.5px solid #86efac;
+    border-radius: 14px;
+    padding: 26px 28px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+    text-align: center;
+}
+
+.loading-spinner-agri {
+    width: 44px;
+    height: 44px;
+    border: 4px solid #dcfce7;
+    border-top: 4px solid #16a34a;
+    border-radius: 50%;
+    animation: spin 0.9s linear infinite;
+    margin: 0 auto 16px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.loading-pipeline-steps {
+    display: flex;
+    justify-content: center;
+    gap: 14px;
+    flex-wrap: wrap;
+    margin-top: 12px;
+}
+
+.pipeline-step-badge {
+    background: #f1f5f9;
+    color: #475569;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.3s;
+}
+
+.pipeline-step-badge.active {
+    background: #dcfce7;
+    color: #14532d;
+    border: 1px solid #86efac;
+    font-weight: 700;
+}
+
+/* Real Answer Card */
+.farming-response-card {
+    background: #ffffff;
+    border: 1.5px solid #86efac;
+    border-radius: 14px;
+    padding: 26px 30px;
+    box-shadow: 0 6px 20px rgba(22, 101, 52, 0.07);
+    animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.response-meta-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 18px;
+    border-bottom: 1px solid #e2e8f0;
+    padding-bottom: 12px;
+}
+
+.response-badges-left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.badge-topic-tag {
+    background: #e0f2fe;
+    color: #0369a1;
+    padding: 3px 12px;
+    border-radius: 20px;
+    font-size: 0.78rem;
+    font-weight: 700;
+}
+
+.badge-engine-tag {
+    background: #f0fdf4;
+    color: #15803d;
+    border: 1px solid #bbf7d0;
+    padding: 3px 12px;
+    border-radius: 20px;
+    font-size: 0.78rem;
+    font-weight: 600;
+}
+
+.badge-context-tag {
+    background: #fef3c7;
+    color: #92400e;
+    padding: 3px 12px;
+    border-radius: 20px;
+    font-size: 0.78rem;
+    font-weight: 600;
+}
+
+/* Formatted Answer Typography */
+.response-body-content {
+    color: #1e293b;
+    font-size: 1.02rem;
+    line-height: 1.7;
+    margin-bottom: 22px;
+}
+
+.response-body-content strong {
+    color: #0f172a;
+    font-weight: 700;
+}
+
+.response-body-content h1,
+.response-body-content h2,
+.response-body-content h3,
+.response-body-content h4 {
+    color: #14532d;
+    margin-top: 14px;
+    margin-bottom: 8px;
+    font-weight: 800;
+}
+
+.response-body-content ul,
+.response-body-content ol {
+    margin-left: 20px;
+    margin-bottom: 14px;
+}
+
+.response-body-content li {
+    margin-bottom: 6px;
+}
+
+/* Safety Callout Box */
+.safety-advisory-box {
+    background: #fffbeb;
+    border-left: 4px solid #f59e0b;
+    border-radius: 0 8px 8px 0;
+    padding: 12px 16px;
+    font-size: 0.88rem;
+    color: #92400e;
+    line-height: 1.5;
+    margin-bottom: 20px;
+}
+
+.safety-advisory-box strong {
+    color: #78350f;
+}
+
+/* Audio Playback Bar */
+.response-audio-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+    background: #f0fdf4;
+    border: 1px solid #bbf7d0;
+    border-radius: 10px;
+    padding: 12px 18px;
+    margin-bottom: 24px;
+}
+
+.btn-play-audio {
+    background: #166534;
+    color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    padding: 8px 18px;
+    font-size: 0.92rem;
+    font-weight: 700;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s;
+}
+
+.btn-play-audio:hover {
+    background: #14532d;
+    transform: translateY(-1px);
+}
+
+.btn-play-audio.playing {
+    background: #d97706;
+}
+
+.audio-playing-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.84rem;
+    font-weight: 600;
+    color: #15803d;
+}
+
+.audio-bars-anim {
+    display: inline-flex;
+    align-items: flex-end;
+    gap: 3px;
+    height: 14px;
+}
+
+.audio-bars-anim span {
+    width: 3px;
+    background: #16a34a;
+    border-radius: 1px;
+    animation: barBounce 0.6s infinite alternate;
+}
+
+.audio-bars-anim span:nth-child(1) { height: 6px; }
+.audio-bars-anim span:nth-child(2) { height: 14px; animation-delay: 0.15s; }
+.audio-bars-anim span:nth-child(3) { height: 8px; animation-delay: 0.3s; }
+.audio-bars-anim span:nth-child(4) { height: 12px; animation-delay: 0.45s; }
+
+@keyframes barBounce {
+    from { height: 4px; }
+    to { height: 14px; }
+}
+
+/* Follow-up Question Area */
+.farming-followup-area {
+    background: #f8fafc;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 16px 20px;
+}
+
+.followup-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #475569;
+}
+
+.followup-input-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.card-mic-btn-sm {
+    background: #ffffff;
+    border: 1.5px solid #cbd5e1;
+    color: #166534;
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    flex-shrink: 0;
+}
+
+.card-mic-btn-sm:hover {
+    border-color: #16a34a;
+    background: #f0fdf4;
+}
+
+.card-mic-btn-sm.recording {
+    background: #dc2626;
+    color: #ffffff;
+    border-color: #dc2626;
+    animation: micPulse 1.2s infinite;
+}
+
+.card-followup-input {
+    flex: 1;
+    border: 1.5px solid #cbd5e1;
+    border-radius: 8px;
+    padding: 9px 14px;
+    font-size: 0.95rem;
+    color: #1e293b;
+    outline: none;
+    background: #ffffff;
+    font-family: inherit;
+    transition: border-color 0.2s;
+}
+
+.card-followup-input:focus {
+    border-color: #16a34a;
+    box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.15);
+}
+
+.card-followup-btn {
+    background: #15803d;
+    color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    padding: 9px 18px;
+    font-size: 0.9rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    flex-shrink: 0;
+}
+
+.card-followup-btn:hover {
+    background: #14532d;
+}
+
+/* Multi-turn History Drawer */
+.farming-history-drawer {
+    margin-top: 18px;
+    border-top: 1px dashed #cbd5e1;
+    padding-top: 14px;
+}
+
+.history-toggle-btn {
+    background: none;
+    border: none;
+    color: #64748b;
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 0;
+}
+
+.history-toggle-btn:hover {
+    color: #15803d;
+}
+
+.history-turns-list {
+    margin-top: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.history-turn-item {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 0.88rem;
+}
+
+.history-turn-user {
+    font-weight: 700;
+    color: #15803d;
+    margin-bottom: 4px;
+}
+
+.history-turn-bot {
+    color: #334155;
+    font-size: 0.84rem;
+    line-height: 1.45;
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+    .farming-card-container {
+        padding: 22px 18px;
+    }
+    .farming-card-title {
+        font-size: 1.45rem;
+    }
+    .farming-card-title .tagline-accent {
+        font-size: 1.1rem;
+    }
+    .farming-input-bar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .card-mic-btn {
+        justify-content: center;
+    }
+    .card-submit-btn {
+        justify-content: center;
+    }
+    .followup-input-group {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .card-followup-btn {
+        text-align: center;
+    }
+}
+

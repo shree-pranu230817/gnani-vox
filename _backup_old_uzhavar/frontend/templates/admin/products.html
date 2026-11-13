@@ -1,0 +1,105 @@
+{% extends 'base.html' %}
+
+{% block title %}Product Approvals & Management – Admin – {{ t('app_name') }}{% endblock %}
+
+{% block content %}
+<div class="dashboard-header">
+    <div class="dashboard-title">
+        <h2>🌾 Crop Products Moderation & Approvals</h2>
+        <p>Approve new crop listings, review quality, reject substandard crops, and monitor inventory</p>
+    </div>
+    <a href="{{ url_for('admin.dashboard') }}" class="btn btn-outline">
+        &larr; Back to Admin Center
+    </a>
+</div>
+
+<!-- Status Filter Tabs -->
+<div style="display: flex; gap: 8px; margin-bottom: 20px;">
+    <a href="{{ url_for('admin.products', status='all') }}" class="btn {% if current_status == 'all' %}btn-primary{% else %}btn-outline{% endif %} btn-sm">
+        All Crops
+    </a>
+    <a href="{{ url_for('admin.products', status='pending') }}" class="btn {% if current_status == 'pending' %}btn-primary{% else %}btn-outline{% endif %} btn-sm">
+        Pending Approvals
+    </a>
+    <a href="{{ url_for('admin.products', status='active') }}" class="btn {% if current_status == 'active' %}btn-primary{% else %}btn-outline{% endif %} btn-sm">
+        Active in Marketplace
+    </a>
+    <a href="{{ url_for('admin.products', status='rejected') }}" class="btn {% if current_status == 'rejected' %}btn-primary{% else %}btn-outline{% endif %} btn-sm">
+        Rejected
+    </a>
+</div>
+
+<div class="card">
+    <div class="card-body" style="padding: 0;">
+        <div class="table-responsive">
+            <table class="custom-table">
+                <thead>
+                    <tr>
+                        <th>Crop Details</th>
+                        <th>Seller Farmer</th>
+                        <th>Category</th>
+                        <th>Price & Stock</th>
+                        <th>Harvest Location</th>
+                        <th>Status</th>
+                        <th>Moderation Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for p in products %}
+                    <tr>
+                        <td>
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <img src="{{ p.image_url }}" alt="{{ p.name }}" style="width: 44px; height: 44px; border-radius: 6px; object-fit: cover;" onerror="this.src='https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?auto=format&fit=crop&w=150&q=80'">
+                                <div>
+                                    <strong>{{ p.name }}</strong>
+                                    <div style="font-size: 0.72rem; color: var(--text-muted);">#PROD-{{ p.id }}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td>{{ p.farmer_name }}</td>
+                        <td>{{ p.category_name }}</td>
+                        <td>
+                            <strong>₹{{ p.price_per_unit }}</strong> / {{ p.stock_unit }}
+                            <div style="font-size: 0.75rem; color: var(--text-muted);">Stock: {{ p.stock_quantity }}</div>
+                        </td>
+                        <td>{{ p.harvest_location }}, {{ p.district }} ({{ p.state }})</td>
+                        <td>
+                            <span class="badge badge-{{ p.status }}">{{ p.status }}</span>
+                        </td>
+                        <td>
+                            <div style="display: flex; gap: 4px; flex-wrap: wrap;">
+                                {% if p.status != 'active' %}
+                                <form method="POST" action="{{ url_for('admin.approve_product', product_id=p.id) }}">
+                                    <button type="submit" class="btn btn-primary btn-sm" style="padding: 3px 8px; font-size: 0.72rem;">
+                                        Approve
+                                    </button>
+                                </form>
+                                {% endif %}
+
+                                {% if p.status != 'rejected' %}
+                                <form method="POST" action="{{ url_for('admin.reject_product', product_id=p.id) }}">
+                                    <button type="submit" class="btn btn-outline btn-sm" style="padding: 3px 8px; font-size: 0.72rem; color: #dc2626; border-color: #fca5a5;">
+                                        Reject
+                                    </button>
+                                </form>
+                                {% endif %}
+
+                                <a href="{{ url_for('marketplace.product_detail', product_id=p.id) }}" class="btn btn-outline btn-sm" style="padding: 3px 8px; font-size: 0.72rem;">
+                                    View
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="7" style="text-align: center; padding: 30px; color: var(--text-muted);">
+                            No products found in this category.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

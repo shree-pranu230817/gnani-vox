@@ -1,0 +1,149 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ t('mandi_prices') }} – Official AGMARKNET Daily Rates{% endblock %}
+
+{% block content %}
+<div class="dashboard-header">
+    <div class="dashboard-title">
+        <h2>📊 {{ t('mandi_prices') }} (AGMARKNET)</h2>
+        <p>Real-time daily commodity rates across wholesale APMC markets in India</p>
+    </div>
+    <!-- Live Govt API Sync Action -->
+    <form method="POST" action="{{ url_for('mandi.sync_data') }}">
+        <button type="submit" class="btn btn-outline" style="border-color: #166534; color: #166534;">
+            🔄 Sync Live Govt Data (AGMARKNET API)
+        </button>
+    </form>
+</div>
+
+<!-- Official Govt Source Banner -->
+<div class="card" style="margin-bottom: 24px; background: #f0fdf4; border: 1px solid #86efac; padding: 16px 20px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+        <div style="display: flex; align-items: center; gap: 10px;">
+            <span style="font-size: 1.8rem;">🏛️</span>
+            <div>
+                <strong style="color: #14532d; font-size: 0.95rem;">
+                    {{ t('govt_data_source') }}
+                </strong>
+                <div style="font-size: 0.8rem; color: #15803d;">
+                    Verified daily wholesale prices directly from APMC mandis. Never invented, official market data only.
+                </div>
+            </div>
+        </div>
+        <div style="text-align: right; font-size: 0.82rem; color: #166534;">
+            <span>Last Updated: <strong>{{ latest_update }}</strong></span>
+        </div>
+    </div>
+</div>
+
+<!-- Top Commodities Summary Cards -->
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin-bottom: 24px;">
+    {% for stat in top_stats %}
+    <div class="card" style="padding: 14px; text-align: center; border-top: 3px solid var(--primary-600);">
+        <div style="font-size: 0.85rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">{{ stat.crop_name }}</div>
+        <div style="font-size: 1.35rem; font-weight: 800; color: var(--primary-900); margin: 4px 0;">
+            ₹{{ stat.avg_price }}
+        </div>
+        <div style="font-size: 0.75rem; color: var(--text-muted);">
+            Avg. Modal Price (₹/Qtl)
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Filter Bar -->
+<div class="card" style="padding: 16px; margin-bottom: 24px;">
+    <form method="GET" action="{{ url_for('mandi.prices') }}" style="display: flex; flex-wrap: wrap; gap: 12px; align-items: center;">
+        <!-- Search Keyword -->
+        <div style="flex: 2; min-width: 220px;">
+            <input type="text" name="q" class="form-control" placeholder="Search commodity or mandi..." value="{{ search_query }}">
+        </div>
+
+        <!-- State Select -->
+        <div style="flex: 1; min-width: 160px;">
+            <select name="state" class="form-control" onchange="this.form.submit()">
+                <option value="All">All Indian States</option>
+                {% for st in filter_opts.states %}
+                <option value="{{ st }}" {% if selected_state == st %}selected{% endif %}>{{ st }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <!-- Crop Select -->
+        <div style="flex: 1; min-width: 160px;">
+            <select name="crop" class="form-control" onchange="this.form.submit()">
+                <option value="All">All Commodities</option>
+                {% for crp in filter_opts.crops %}
+                <option value="{{ crp }}" {% if selected_crop == crp %}selected{% endif %}>{{ crp }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Filter Rates</button>
+        {% if selected_state != 'All' or selected_crop != 'All' or search_query %}
+        <a href="{{ url_for('mandi.prices') }}" class="btn btn-outline">Reset</a>
+        {% endif %}
+    </form>
+</div>
+
+<!-- Mandi Prices Table -->
+<div class="card">
+    <div class="card-body" style="padding: 0;">
+        <div class="table-responsive">
+            <table class="custom-table">
+                <thead>
+                    <tr>
+                        <th>Commodity</th>
+                        <th>Mandi Market</th>
+                        <th>State & District</th>
+                        <th>{{ t('min_price') }}</th>
+                        <th>{{ t('max_price') }}</th>
+                        <th>{{ t('modal_price') }}</th>
+                        <th>Date & Source</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for p in prices %}
+                    <tr>
+                        <td>
+                            <strong style="color: var(--primary-900); font-size: 1rem;">{{ p.crop_name }}</strong>
+                        </td>
+                        <td>
+                            <strong>{{ p.mandi_name }}</strong>
+                        </td>
+                        <td>
+                            <div>{{ p.district }}</div>
+                            <div style="font-size: 0.75rem; color: var(--text-muted);">{{ p.state }}</div>
+                        </td>
+                        <td style="color: #475569; font-weight: 600;">₹{{ p.min_price }}</td>
+                        <td style="color: #475569; font-weight: 600;">₹{{ p.max_price }}</td>
+                        <td>
+                            <div style="font-size: 1.15rem; font-weight: 800; color: var(--primary-800);">
+                                ₹{{ p.modal_price }}
+                            </div>
+                            <div style="font-size: 0.72rem; color: var(--text-muted);">{{ p.unit }}</div>
+                        </td>
+                        <td style="font-size: 0.8rem; color: var(--text-muted);">
+                            <div>📅 {{ p.price_date }}</div>
+                            <div style="font-size: 0.72rem; color: #166534;">{{ p.data_source }}</div>
+                        </td>
+                        <td>
+                            <a href="{{ url_for('marketplace.index', q=p.crop_name) }}" class="btn btn-outline btn-sm" title="Find local farmers selling this crop">
+                                Find on Market &rarr;
+                            </a>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="8" style="text-align: center; padding: 30px; color: var(--text-muted);">
+                            No market price records found for this filter.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

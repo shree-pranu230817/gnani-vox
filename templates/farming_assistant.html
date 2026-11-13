@@ -1,0 +1,136 @@
+{% extends 'base.html' %}
+
+{% block title %}AI Farming Assistant | UZHAVAR AI{% endblock %}
+
+{% block content %}
+<div class="screen-wrapper">
+    <div class="container">
+        <!-- Breadcrumb / Back Link -->
+        <div style="margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center;">
+            <a href="{{ url_for('index') }}" style="font-weight: 700; color: var(--primary-green); display: inline-flex; align-items: center; gap: 6px;">
+                <span data-i18n="back_to_home">← Back to Home</span>
+            </a>
+            <div id="activeConvBadge" style="font-size: 0.8rem; background: #ecfdf5; color: var(--primary-dark); border: 1px solid #a7f3d0; padding: 4px 14px; border-radius: 20px; font-weight: 700;" data-i18n="active_chat_badge">
+                🌾 Active Consultation
+            </div>
+        </div>
+
+        <div class="screen-card-box">
+            <!-- Screen Header -->
+            <div class="screen-header-bar">
+                <div class="screen-header-left">
+                    <h2 data-i18n="fa_title">🌿 AI Farming Assistant</h2>
+                    <p data-i18n="fa_subtitle">Ask any question about crops, fertilizers, pest control, plant diseases and irrigation – with permanent conversation memory.</p>
+                </div>
+                <div>
+                    <button id="btnClearConversation" class="btn-icon-action" style="background: #fee2e2; color: #b91c1c; border-color: #fca5a5;" title="Clear conversation memory & start fresh">
+                        <span>🗑️</span>
+                        <span data-i18n="clear_chat_btn">Clear Chat</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Two-Column Grid: Persistent History Sidebar + Active Chat Area -->
+            <div class="farming-layout-grid">
+                <!-- Left Column: Persistent Chat History Sidebar -->
+                <aside class="conv-sidebar">
+                    <button id="btnNewChat" class="btn-new-chat" title="Start New Conversation">
+                        <span>+</span>
+                        <span data-i18n="new_chat_btn">New Consultation</span>
+                    </button>
+
+                    <div class="conv-sidebar-header">
+                        <span data-i18n="prev_chats_title" style="font-size: 0.8rem; font-weight: 800; color: #475569; text-transform: uppercase; letter-spacing: 0.5px;">
+                            📋 Previous Consultations
+                        </span>
+                        <span id="convCountBadge" style="font-size: 0.72rem; background: #e2e8f0; color: #475569; padding: 2px 8px; border-radius: 12px; font-weight: 700;">0</span>
+                    </div>
+
+                    <div id="conversationsList" class="conv-list">
+                        <!-- Populated dynamically from SQLite via /api/conversations -->
+                        <div style="text-align: center; color: #94a3b8; font-size: 0.85rem; padding: 20px 0;" data-i18n="no_past_chats">
+                            No past consultations yet
+                        </div>
+                    </div>
+                </aside>
+
+                <!-- Right Column: Active Consultation Workspace -->
+                <main class="conv-main-workspace">
+                    <!-- Language & Hands-free Controls -->
+                    <div class="lang-selector-strip" style="justify-content: flex-start; gap: 20px; margin-bottom: 16px;">
+                        <div class="lang-select-box">
+                            <label data-i18n="response_lang_label">Response Language:</label>
+                            <select id="assistantLangSelect" class="styled-lang-select">
+                                {% for code, info in languages.items() %}
+                                <option value="{{ code }}" class="font-{{ code }}" {% if code == 'en' %}selected{% endif %}>
+                                    {% if info.native == info.name %}{{ info.flag }} {{ info.name }}{% else %}{{ info.flag }} {{ info.native }} ({{ info.name }}){% endif %}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <!-- Hands-free Toggle -->
+                        <div style="margin-left: auto; display: flex; align-items: center; gap: 8px;">
+                            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.85rem; font-weight: 700; color: #334155;">
+                                <input type="checkbox" id="assistantHandsFreeToggle">
+                                <span data-i18n="handsfree_label">Hands-Free Mode</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Voice Interaction Hub (Large Microphone) -->
+                    <div class="voice-control-unit" style="margin-bottom: 16px;">
+                        <button id="assistantMicBtn" class="big-mic-btn" title="Tap to Ask Voice Question">
+                            🎙️
+                        </button>
+                        <div id="assistantVoiceStatus" class="voice-status-banner" data-i18n="status_ready">
+                            Ready to speak
+                        </div>
+                    </div>
+
+                    <!-- Text Question Input Bar -->
+                    <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+                        <input type="text" id="assistantTextInput" class="styled-lang-select" style="flex: 1; border-radius: var(--radius-md); padding: 12px 18px; font-size: 1rem; border: 2px solid var(--border-light);" placeholder="Type your farming question (e.g., I am growing paddy, 30 days old, leaves are yellow)..." data-i18n-placeholder="fa_input_placeholder" autocomplete="off">
+                        <button id="assistantSubmitBtn" class="service-btn" style="padding: 12px 24px;">
+                            <span data-i18n="ask_ai_btn">Ask AI</span>
+                            <span>➤</span>
+                        </button>
+                    </div>
+
+                    <!-- Chat Thread Container (Persistent Multi-Turn Dialogue) -->
+                    <div id="chatThreadContainer" class="chat-thread-container" style="background: #f8fafc; border: 1.5px solid var(--border-light); border-radius: var(--radius-md); padding: 20px; min-height: 280px;">
+                        <!-- Initial Welcome Card (shown when conversation has 0 messages) -->
+                        <div id="assistantInitialState" style="text-align: center; color: var(--text-muted); padding: 40px 10px;">
+                            <div style="font-size: 2.4rem; margin-bottom: 10px;">🌾</div>
+                            <h3 style="color: var(--primary-dark); font-size: 1.2rem; margin-bottom: 8px;" data-i18n="fa_welcome_title">Welcome! Ask Your Farming Questions</h3>
+                            <p style="font-size: 0.92rem; max-width: 520px; margin: 0 auto; line-height: 1.6;" data-i18n="fa_welcome_desc">
+                                Speak or type your agricultural questions. The assistant remembers your crop name, age, soil type, and symptoms across all follow-up questions.
+                            </p>
+                        </div>
+
+                        <!-- Dialogue messages are injected here in chronological order -->
+                        <div id="chatMessagesList" style="display: flex; flex-direction: column; gap: 16px;"></div>
+                    </div>
+
+                    <!-- Quick Agricultural Question Chips -->
+                    <div class="quick-chips-wrapper">
+                        <div class="quick-chips-label" data-i18n="fa_chips_label">Frequently Asked Questions:</div>
+                        <div class="quick-chips-row" id="faQuickChips">
+                            <button type="button" class="chip-btn" data-q="I am growing paddy" data-i18n="chip_paddy">🌾 I am growing paddy</button>
+                            <button type="button" class="chip-btn" data-q="Crop is 30 days old" data-i18n="chip_age">📅 Crop is 30 days old</button>
+                            <button type="button" class="chip-btn" data-q="Leaves are turning yellow" data-i18n="chip_yellow">🍂 Leaves are turning yellow</button>
+                            <button type="button" class="chip-btn" data-q="What fertilizer should I use?" data-i18n="chip_fert">🧪 What fertilizer should I use?</button>
+                            <button type="button" class="chip-btn" data-q="How to control stem borers?" data-i18n="chip_pest">🐛 How to control stem borers?</button>
+                            <button type="button" class="chip-btn" data-q="Recommended irrigation schedule?" data-i18n="chip_water">💧 Recommended irrigation schedule?</button>
+                        </div>
+                    </div>
+                </main>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="{{ url_for('static', filename='js/farming_assistant.js') }}"></script>
+{% endblock %}

@@ -1,0 +1,174 @@
+{% extends 'base.html' %}
+
+{% block title %}Farmer Dashboard – {{ t('app_name') }}{% endblock %}
+
+{% block content %}
+<div class="dashboard-header">
+    <div class="dashboard-title">
+        <h2>🚜 Farmer Portal: {{ farmer.full_name }}</h2>
+        <p>Manage your harvest listings, orders from buyers, earnings, and loyalty points</p>
+    </div>
+    <div style="display: flex; gap: 10px;">
+        <a href="{{ url_for('farmer.add_product') }}" class="btn btn-primary">
+            ➕ Add New Crop
+        </a>
+        <a href="{{ url_for('farmer.orders') }}" class="btn btn-outline">
+            📦 Manage Orders
+        </a>
+    </div>
+</div>
+
+<!-- Stats Metric Row -->
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-icon-box stat-icon-green">🌾</div>
+        <div class="stat-details">
+            <h4>Listed Crops</h4>
+            <div class="stat-value">{{ total_listings }}</div>
+        </div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-icon-box stat-icon-gold">💰</div>
+        <div class="stat-details">
+            <h4>Total Sales</h4>
+            <div class="stat-value">₹{{ "{:,.2f}".format(total_sales) }}</div>
+        </div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-icon-box stat-icon-blue">📦</div>
+        <div class="stat-details">
+            <h4>Orders Received</h4>
+            <div class="stat-value">{{ total_orders_count }}</div>
+        </div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-icon-box stat-icon-purple">⭐</div>
+        <div class="stat-details">
+            <h4>Reward Points</h4>
+            <div class="stat-value">{{ farmer.reward_points }}</div>
+        </div>
+    </div>
+</div>
+
+<!-- Products Table -->
+<div class="card" style="margin-bottom: 30px;">
+    <div class="card-header">
+        <h3 class="card-title">My Farm Harvest Listings</h3>
+        <a href="{{ url_for('farmer.add_product') }}" class="btn btn-outline btn-sm">
+            + List Produce
+        </a>
+    </div>
+    <div class="card-body" style="padding: 0;">
+        <div class="table-responsive">
+            <table class="custom-table">
+                <thead>
+                    <tr>
+                        <th>Crop</th>
+                        <th>Category</th>
+                        <th>Price</th>
+                        <th>Available Stock</th>
+                        <th>Harvest Location</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for p in products %}
+                    <tr>
+                        <td>
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <img src="{{ p.image_url }}" alt="{{ p.name }}" style="width: 44px; height: 44px; border-radius: 6px; object-fit: cover;" onerror="this.src='https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?auto=format&fit=crop&w=150&q=80'">
+                                <div>
+                                    <strong style="color: var(--primary-900);">{{ p.name }}</strong>
+                                    <div style="font-size: 0.75rem; color: var(--text-muted);">ID: #PROD-{{ p.id }}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td>{{ p.category_name }}</td>
+                        <td style="font-weight: 700; color: var(--primary-800);">₹{{ p.price_per_unit }} / {{ p.stock_unit }}</td>
+                        <td>{{ p.stock_quantity }} {{ p.stock_unit }}</td>
+                        <td>{{ p.harvest_location }}, {{ p.district }}</td>
+                        <td>
+                            <span class="badge badge-{{ p.status }}">{{ p.status }}</span>
+                        </td>
+                        <td>
+                            <div style="display: flex; gap: 6px;">
+                                <a href="{{ url_for('marketplace.product_detail', product_id=p.id) }}" class="btn btn-outline btn-sm" title="View Public Page">
+                                    👁️
+                                </a>
+                                <a href="{{ url_for('farmer.edit_product', product_id=p.id) }}" class="btn btn-outline btn-sm" title="Edit Listing">
+                                    ✏️
+                                </a>
+                                <form method="POST" action="{{ url_for('farmer.delete_product', product_id=p.id) }}" onsubmit="return confirm('Are you sure you want to remove this crop listing?');" style="display:inline;">
+                                    <button type="submit" class="btn btn-outline btn-sm" style="color: #dc2626; border-color: #fca5a5;" title="Delete">
+                                        🗑️
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="7" style="text-align: center; padding: 30px; color: var(--text-muted);">
+                            You have not listed any crops yet. Click "Add New Crop" above to start selling!
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Orders Received -->
+<div class="card">
+    <div class="card-header">
+        <h3 class="card-title">Recent Orders from Buyers</h3>
+        <a href="{{ url_for('farmer.orders') }}" class="btn btn-outline btn-sm">View All Orders</a>
+    </div>
+    <div class="card-body" style="padding: 0;">
+        <div class="table-responsive">
+            <table class="custom-table">
+                <thead>
+                    <tr>
+                        <th>Order Ref</th>
+                        <th>Buyer</th>
+                        <th>Final Amount</th>
+                        <th>Payment Status</th>
+                        <th>Delivery Status</th>
+                        <th>Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for o in orders %}
+                    <tr>
+                        <td><strong>{{ o.order_number }}</strong></td>
+                        <td>
+                            <div>{{ o.buyer_name }}</div>
+                            <div style="font-size: 0.75rem; color: var(--text-muted);">📞 {{ o.buyer_mobile }}</div>
+                        </td>
+                        <td style="font-weight: 700; color: var(--primary-800);">₹{{ o.final_amount }}</td>
+                        <td>
+                            <span class="badge badge-{{ o.payment_status }}">{{ o.payment_status }}</span>
+                        </td>
+                        <td>
+                            <span class="badge badge-{{ o.status }}">{{ o.status }}</span>
+                        </td>
+                        <td style="color: var(--text-muted); font-size: 0.8rem;">{{ o.created_at[:10] }}</td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="6" style="text-align: center; padding: 24px; color: var(--text-muted);">
+                            No orders received yet. Active crop listings will receive direct purchase requests from buyers!
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

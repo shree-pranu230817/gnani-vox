@@ -1,0 +1,90 @@
+{% extends 'base.html' %}
+
+{% block title %}Incoming Buyer Orders – {{ t('app_name') }}{% endblock %}
+
+{% block content %}
+<div class="dashboard-header">
+    <div class="dashboard-title">
+        <h2>📦 Incoming Orders from Buyers</h2>
+        <p>Review customer purchase orders, manage dispatches, and confirm deliveries</p>
+    </div>
+    <a href="{{ url_for('farmer.dashboard') }}" class="btn btn-outline">
+        &larr; Back to Dashboard
+    </a>
+</div>
+
+<div class="card">
+    <div class="card-body" style="padding: 0;">
+        <div class="table-responsive">
+            <table class="custom-table">
+                <thead>
+                    <tr>
+                        <th>Order #</th>
+                        <th>Buyer & Contact</th>
+                        <th>Delivery Address</th>
+                        <th>Final Amount</th>
+                        <th>Payment Method</th>
+                        <th>Order Status</th>
+                        <th>Update Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for o in orders %}
+                    <tr>
+                        <td>
+                            <strong>{{ o.order_number }}</strong>
+                            <div style="font-size: 0.75rem; color: var(--text-muted);">{{ o.created_at[:10] }}</div>
+                        </td>
+                        <td>
+                            <div style="font-weight: 700; color: var(--primary-900);">{{ o.buyer_name }}</div>
+                            <div style="font-size: 0.8rem; color: var(--text-muted);">📞 {{ o.buyer_mobile }}</div>
+                        </td>
+                        <td style="max-width: 220px; font-size: 0.85rem;">
+                            {{ o.delivery_address }}
+                            {% if o.notes %}
+                            <div style="font-size: 0.75rem; color: #15803d; font-style: italic; margin-top: 4px;">
+                                Note: "{{ o.notes }}"
+                            </div>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div style="font-size: 1.15rem; font-weight: 800; color: var(--primary-800);">
+                                ₹{{ o.final_amount }}
+                            </div>
+                            {% if o.discount_amount > 0 %}
+                            <div style="font-size: 0.72rem; color: #16a34a;">Saved ₹{{ o.discount_amount }}</div>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div style="font-size: 0.85rem;">{{ o.payment_method }}</div>
+                            <span class="badge badge-{{ o.payment_status }}">{{ o.payment_status }}</span>
+                        </td>
+                        <td>
+                            <span class="badge badge-{{ o.status }}">{{ o.status }}</span>
+                        </td>
+                        <td>
+                            <form method="POST" action="{{ url_for('farmer.update_order_status', order_id=o.id) }}" style="display: flex; gap: 6px; align-items: center;">
+                                <select name="status" class="form-control" style="font-size: 0.8rem; padding: 4px 8px; width: auto;">
+                                    <option value="pending" {% if o.status == 'pending' %}selected{% endif %}>Pending</option>
+                                    <option value="confirmed" {% if o.status == 'confirmed' %}selected{% endif %}>Confirmed</option>
+                                    <option value="shipped" {% if o.status == 'shipped' %}selected{% endif %}>Shipped</option>
+                                    <option value="delivered" {% if o.status == 'delivered' %}selected{% endif %}>Delivered (+50 pts)</option>
+                                    <option value="cancelled" {% if o.status == 'cancelled' %}selected{% endif %}>Cancelled</option>
+                                </select>
+                                <button type="submit" class="btn btn-primary btn-sm" style="padding: 4px 10px;">Update</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="7" style="text-align: center; padding: 30px; color: var(--text-muted);">
+                            No incoming orders yet. Once buyers order your produce, they will appear here!
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

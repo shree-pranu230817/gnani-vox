@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+
+{% block title %}My Notifications – {{ t('app_name') }}{% endblock %}
+
+{% block content %}
+<div style="max-width: 760px; margin: 20px auto;">
+    <div class="dashboard-header">
+        <div class="dashboard-title">
+            <h2>🔔 My Notifications</h2>
+            <p>Real-time order updates, product approvals, and price alerts</p>
+        </div>
+        <button onclick="markAllRead()" class="btn btn-outline btn-sm">
+            Mark All as Read
+        </button>
+    </div>
+
+    <div class="card">
+        <div class="card-body" style="padding: 0;">
+            {% for n in notifications %}
+            <div style="padding: 16px 20px; border-bottom: 1px solid var(--border-light); display: flex; gap: 14px; align-items: flex-start; {% if n.is_read == 0 %}background: #f0fdf4;{% endif %}">
+                <div style="font-size: 1.5rem;">
+                    {% if n.type == 'order' %}📦
+                    {% elif n.type == 'reward' %}⭐
+                    {% elif n.type == 'product' %}🌾
+                    {% else %}🔔{% endif %}
+                </div>
+                <div style="flex: 1;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                        <strong style="color: var(--primary-900); font-size: 0.95rem;">{{ n.title }}</strong>
+                        <span style="font-size: 0.75rem; color: var(--text-muted);">{{ n.created_at[:16] }}</span>
+                    </div>
+                    <p style="font-size: 0.88rem; color: var(--text-secondary); margin-bottom: 6px;">{{ n.message }}</p>
+                    {% if n.link %}
+                    <a href="{{ n.link }}" style="font-size: 0.82rem; font-weight: 700; color: var(--primary-700);">
+                        View Details &rarr;
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+            {% else %}
+            <div style="padding: 40px; text-align: center; color: var(--text-muted);">
+                <div style="font-size: 2.5rem; margin-bottom: 10px;">📭</div>
+                You have no notifications yet.
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<script>
+function markAllRead() {
+    fetch('/notifications/read-all', { method: 'POST' })
+        .then(() => window.location.reload());
+}
+</script>
+{% endblock %}

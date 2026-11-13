@@ -1,0 +1,93 @@
+{% extends 'base.html' %}
+
+{% block title %}User Management – Admin – {{ t('app_name') }}{% endblock %}
+
+{% block content %}
+<div class="dashboard-header">
+    <div class="dashboard-title">
+        <h2>👥 User Management</h2>
+        <p>Manage registered farmers, wholesale buyers, and account statuses</p>
+    </div>
+    <a href="{{ url_for('admin.dashboard') }}" class="btn btn-outline">
+        &larr; Back to Admin Center
+    </a>
+</div>
+
+<!-- Search & Role Filter -->
+<div class="card" style="padding: 16px; margin-bottom: 24px;">
+    <form method="GET" action="{{ url_for('admin.users') }}" style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+        <input type="text" name="q" class="form-control" placeholder="Search by name, mobile, email..." value="{{ search }}" style="flex: 2; min-width: 220px;">
+        <select name="role" class="form-control" onchange="this.form.submit()" style="flex: 1; min-width: 150px;">
+            <option value="all" {% if current_role == 'all' %}selected{% endif %}>All Roles</option>
+            <option value="farmer" {% if current_role == 'farmer' %}selected{% endif %}>Farmers Only</option>
+            <option value="buyer" {% if current_role == 'buyer' %}selected{% endif %}>Buyers Only</option>
+            <option value="admin" {% if current_role == 'admin' %}selected{% endif %}>Admins Only</option>
+        </select>
+        <button type="submit" class="btn btn-primary">Search</button>
+        {% if search or current_role != 'all' %}
+        <a href="{{ url_for('admin.users') }}" class="btn btn-outline">Reset</a>
+        {% endif %}
+    </form>
+</div>
+
+<div class="card">
+    <div class="card-body" style="padding: 0;">
+        <div class="table-responsive">
+            <table class="custom-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>User Name</th>
+                        <th>Role</th>
+                        <th>Contact</th>
+                        <th>Location</th>
+                        <th>Points</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for u in users %}
+                    <tr>
+                        <td>#{{ u.id }}</td>
+                        <td>
+                            <strong>{{ u.full_name }}</strong>
+                            <div style="font-size: 0.75rem; color: var(--text-muted);">Joined: {{ u.created_at[:10] }}</div>
+                        </td>
+                        <td>
+                            <span class="role-chip">{{ u.role }}</span>
+                        </td>
+                        <td>
+                            <div>📞 {{ u.mobile }}</div>
+                            <div style="font-size: 0.75rem; color: var(--text-muted);">{{ u.email or 'No email' }}</div>
+                        </td>
+                        <td>{{ u.district }}, {{ u.state }}</td>
+                        <td>
+                            <strong style="color: var(--accent-amber);">{{ u.reward_points }} pts</strong>
+                        </td>
+                        <td>
+                            {% if u.is_active == 1 %}
+                            <span class="badge badge-active">Active</span>
+                            {% else %}
+                            <span class="badge badge-rejected">Suspended</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if u.id != session.get('user_id') %}
+                            <form method="POST" action="{{ url_for('admin.toggle_user_status', user_id=u.id) }}">
+                                <button type="submit" class="btn btn-outline btn-sm" style="font-size: 0.75rem; padding: 4px 8px;">
+                                    {% if u.is_active == 1 %}Suspend{% else %}Activate{% endif %}
+                                </button>
+                            </form>
+                            {% else %}
+                            <span style="font-size: 0.75rem; color: var(--text-muted);">Current User</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

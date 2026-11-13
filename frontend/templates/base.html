@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="{{ current_lang }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}{{ t('app_name') }} – {{ t('app_tagline') }}{% endblock %}</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220%22 24%22 width=%2224%22 height=%2224%22><text y=%2220%22 font-size=%2220%22>🌾</text></svg>">
+    
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/assistant.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/farming_card.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+    
+    <!-- Leaflet.js for Farm Maps -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    
+    <!-- Chart.js for Dashboard & Profit Charts -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+
+    <!-- Top Live Ticker -->
+    <div class="top-ticker">
+        <div style="font-weight: 700; display: flex; align-items: center; gap: 6px;">
+            <span class="ticker-badge">LIVE MANDI</span>
+            <span>Government APMC Rates Updated Today</span>
+        </div>
+        <div class="ticker-content">
+            <span>🌾 Ponni Paddy: ₹2,650/Qtl (Thanjavur)</span>
+            <span>🌾 Sharbati Wheat: ₹2,850/Qtl (Sehore)</span>
+            <span>🧅 Nashik Red Onion: ₹1,850/Qtl (Lasalgaon)</span>
+            <span>🌱 Yellow Mustard: ₹5,400/Qtl (Alwar)</span>
+            <span>🌾 Ragi Millet: ₹3,600/Qtl (Mandya)</span>
+            <span>🌿 Black Gram (Urad): ₹7,200/Qtl (Latur)</span>
+        </div>
+    </div>
+
+    <!-- Main Navigation Bar -->
+    <header class="header-nav">
+        <div class="nav-container">
+            <a href="{{ url_for('main.index') }}" class="brand-logo">
+                <span class="brand-icon">🌾</span>
+                <span>{{ t('app_name') }}</span>
+            </a>
+
+            <button class="menu-toggle" aria-label="Toggle navigation">☰</button>
+
+            <ul class="nav-links">
+                <li><a href="{{ url_for('main.index') }}" class="nav-link {% if request.endpoint == 'main.index' %}active{% endif %}">🏠 {{ t('home') }}</a></li>
+                <li><a href="{{ url_for('marketplace.index') }}" class="nav-link {% if 'marketplace' in request.endpoint %}active{% endif %}">🛒 {{ t('marketplace') }}</a></li>
+                <li><a href="{{ url_for('main.farming_assistant') }}" class="nav-link {% if request.endpoint == 'main.farming_assistant' %}active{% endif %}" style="font-weight: 700; color: var(--primary-700);">🌱 {{ t('ai_farming_assistant') }}</a></li>
+                <li><a href="{{ url_for('mandi.prices') }}" class="nav-link {% if 'mandi' in request.endpoint %}active{% endif %}">📊 {{ t('mandi_prices') }}</a></li>
+                <li><a href="{{ url_for('calculator.index') }}" class="nav-link {% if 'calculator' in request.endpoint %}active{% endif %}">🧮 {{ t('profit_calculator') }}</a></li>
+                
+                {% if current_user %}
+                    {% if current_user.role == 'farmer' %}
+                        <li><a href="{{ url_for('farmer.dashboard') }}" class="nav-link {% if 'farmer' in request.endpoint %}active{% endif %}">🚜 {{ t('dashboard') }}</a></li>
+                    {% elif current_user.role == 'buyer' %}
+                        <li><a href="{{ url_for('buyer.dashboard') }}" class="nav-link {% if 'buyer' in request.endpoint %}active{% endif %}">📦 {{ t('dashboard') }}</a></li>
+                    {% elif current_user.role == 'admin' %}
+                        <li><a href="{{ url_for('admin.dashboard') }}" class="nav-link {% if 'admin' in request.endpoint %}active{% endif %}">⚡ {{ t('admin') }}</a></li>
+                    {% endif %}
+                {% endif %}
+            </ul>
+
+            <div class="nav-actions">
+                <!-- 10 Regional Languages Dropdown -->
+                <div class="lang-selector">
+                    <button class="lang-btn" type="button">
+                        <span>{{ languages[current_lang].flag }}</span>
+                        <span>{{ languages[current_lang].native }}</span>
+                        <span style="font-size: 0.7rem;">▼</span>
+                    </button>
+                    <div class="lang-dropdown-menu">
+                        {% for code, lang_info in languages.items() %}
+                        <a href="{{ url_for('auth.set_language', lang_code=code) }}" class="lang-item {% if current_lang == code %}active{% endif %}">
+                            <span>{{ lang_info.flag }} {{ lang_info.native }}</span>
+                            <span style="color: var(--text-muted); font-size: 0.78rem;">{{ lang_info.name }}</span>
+                        </a>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- Notifications Pill if Logged In -->
+                {% if current_user %}
+                <a href="{{ url_for('main.notifications') }}" class="btn btn-outline btn-sm" title="Notifications" style="position: relative; border-radius: var(--radius-full); padding: 7px 12px;">
+                    🔔
+                    {% if unread_notifications > 0 %}
+                    <span style="position: absolute; top: -5px; right: -5px; background: #dc2626; color: #fff; border-radius: 50%; font-size: 0.65rem; font-weight: 800; width: 18px; height: 18px; display: flex; align-items: center; justify-content: center;">
+                        {{ unread_notifications }}
+                    </span>
+                    {% endif %}
+                </a>
+
+                <!-- User Profile Pill -->
+                <a href="{{ url_for('auth.profile') }}" class="user-menu-btn" title="Profile & Rewards">
+                    <span>👤 {{ current_user.full_name.split()[0] }}</span>
+                    <span class="role-chip">{{ current_user.role }}</span>
+                    <span style="color: var(--accent-amber); font-weight: 700; font-size: 0.8rem;">⭐ {{ current_user.reward_points }}</span>
+                </a>
+
+                <a href="{{ url_for('auth.logout') }}" class="btn btn-outline btn-sm" style="color: #dc2626; border-color: #fca5a5;">
+                    {{ t('logout') }}
+                </a>
+
+                {% else %}
+                <a href="{{ url_for('auth.login') }}" class="btn btn-outline btn-sm">{{ t('login') }}</a>
+                <a href="{{ url_for('auth.register') }}" class="btn btn-primary btn-sm">{{ t('register') }}</a>
+                {% endif %}
+            </div>
+        </div>
+    </header>
+
+    <!-- Flash Alerts Container -->
+    <div class="alert-container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">
+                        <span>{{ message }}</span>
+                        <button class="alert-close" aria-label="Close">&times;</button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+    </div>
+
+    <!-- Page Content -->
+    <main class="{% block wrapper_class %}main-wrapper{% endblock %}">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Floating Gnani AI Voice Assistant Button -->
+    <button class="gnani-floating-btn" id="gnaniLauncherBtn" title="Speak with Gnani AI">
+        <span class="gnani-badge-pulse"></span>
+        <span style="font-size: 1.2rem;">🎙️</span>
+        <span>{{ t('talk_to_gnani') }}</span>
+    </button>
+
+    <!-- Gnani AI Assistant Full Modal Window -->
+    <div class="gnani-modal-overlay" id="gnaniModalOverlay">
+        <div class="gnani-modal">
+            <!-- Modal Header -->
+            <div class="gnani-header">
+                <div class="gnani-title-group">
+                    <div class="gnani-avatar">🌾</div>
+                    <div class="gnani-title">
+                        <h3>{{ t('ai_assistant') }}</h3>
+                        <p>Powered by Gnani.ai Prisma (STT) + Evon (AI) + Timbre (TTS)</p>
+                    </div>
+                </div>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <button id="gnaniResetBtn" type="button" title="Start New Consultation (Clear Context)" style="background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 6px; padding: 4px 10px; font-size: 0.76rem; font-weight: 600; color: #475569; cursor: pointer;">🔄 New Chat</button>
+                    <button class="gnani-close-btn" id="gnaniCloseBtn">&times;</button>
+                </div>
+            </div>
+
+            <!-- Main Demonstration Workflow Bar -->
+            <div class="gnani-demo-bar">
+                <div class="gnani-demo-flow">
+                    <span class="flow-step" id="stepPrisma">1. 🎙️ Prisma (STT)</span>
+                    <span>➔</span>
+                    <span class="flow-step" id="stepEvon">2. 🧠 Evon (Agri AI)</span>
+                    <span>➔</span>
+                    <span class="flow-step" id="stepTimbre">3. 🔊 Timbre (TTS)</span>
+                </div>
+                <button class="btn-run-demo" id="gnaniRunDemoBtn" title="Demonstrate full Voice-to-AI-to-Voice Loop">
+                    ▶ Run Voice Demo
+                </button>
+            </div>
+
+            <!-- Chat History Body -->
+            <div class="gnani-chat-body" id="gnaniChatBody">
+                <div class="message-bubble bot">
+                    <div class="message-avatar">🌾</div>
+                    <div class="message-text">
+                        <strong>Vanakkam / Namaste!</strong> I am your Uzhavar AI agricultural assistant powered by Gnani.ai.
+                        <br><br>
+                        Ask me about crop diseases, pest remedies, best fertilizers, organic formulations (Jeevamrutha), or live market rates in any of the 10 Indian regional languages!
+                    </div>
+                </div>
+            </div>
+
+            <!-- Voice & Chat Controls -->
+            <div class="gnani-voice-control">
+                <div class="voice-mic-container">
+                    <button class="voice-mic-btn" id="gnaniMicBtn" title="Tap to Speak (Prisma ASR)">
+                        🎙️
+                    </button>
+                </div>
+                <div class="voice-status-text" id="gnaniStatusText">
+                    {{ t('voice_input_prompt') }}
+                </div>
+
+                <!-- Text & Language Selector Row -->
+                <div class="gnani-input-form">
+                    <select id="gnaniLangSelect" style="padding: 8px; border-radius: var(--radius-full); border: 1px solid var(--border-color); font-size: 0.85rem; background: #fff;">
+                        {% for code, lang_info in languages.items() %}
+                        <option value="{{ code }}" {% if current_lang == code %}selected{% endif %}>
+                            {{ lang_info.flag }} {{ lang_info.native }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                    <input type="text" id="gnaniTextInput" class="gnani-text-input" placeholder="Type agricultural question...">
+                    <button class="gnani-send-btn" id="gnaniSendBtn" title="Send Question">➤</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="site-footer">
+        <div class="footer-container">
+            <div class="footer-col">
+                <div class="brand-logo" style="color: #ffffff; margin-bottom: 12px;">
+                    <span class="brand-icon">🌾</span>
+                    <span>{{ t('app_name') }}</span>
+                </div>
+                <p style="color: #94a3b8; font-size: 0.88rem; margin-bottom: 16px;">
+                    {{ t('app_tagline') }}
+                </p>
+                <div style="background: rgba(255, 255, 255, 0.08); padding: 10px 14px; border-radius: 8px; border-left: 3px solid #4ade80;">
+                    <div style="font-weight: 700; color: #4ade80; font-size: 0.8rem; text-transform: uppercase;">Gnani.ai Internship Competition 2026</div>
+                    <div style="color: #e2e8f0; font-size: 0.78rem;">Voice-First Agriculture Innovation</div>
+                </div>
+            </div>
+
+            <div class="footer-col">
+                <h4>Quick Navigation</h4>
+                <ul class="footer-links">
+                    <li><a href="{{ url_for('marketplace.index') }}">{{ t('marketplace') }}</a></li>
+                    <li><a href="{{ url_for('mandi.prices') }}">{{ t('mandi_prices') }}</a></li>
+                    <li><a href="{{ url_for('calculator.index') }}">{{ t('profit_calculator') }}</a></li>
+                    <li><a href="{{ url_for('auth.login') }}">Farmer / Buyer Portal</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-col">
+                <h4>10 Regional Languages</h4>
+                <p style="font-size: 0.82rem; color: #94a3b8; margin-bottom: 8px;">Interface & Voice AI available in:</p>
+                <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+                    {% for code, lang_info in languages.items() %}
+                    <a href="{{ url_for('auth.set_language', lang_code=code) }}" style="background: rgba(255, 255, 255, 0.08); color: #e2e8f0; font-size: 0.76rem; padding: 3px 8px; border-radius: 4px;">
+                        {{ lang_info.native }}
+                    </a>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="footer-col">
+                <h4>Verified Data & Security</h4>
+                <ul class="footer-links">
+                    <li><span style="color: #4ade80;">✔</span> {{ t('govt_data_source') }}</li>
+                    <li><span style="color: #4ade80;">✔</span> Prisma STT (Speech-to-Text)</li>
+                    <li><span style="color: #4ade80;">✔</span> Evon Generative Conversational AI</li>
+                    <li><span style="color: #4ade80;">✔</span> Timbre TTS (Text-to-Speech)</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="footer-bottom">
+            <div>
+                &copy; 2026 <strong>UZHAVAR AI</strong>. Built for Indian Farmers. All rights reserved.
+            </div>
+            <div style="color: #94a3b8; font-size: 0.82rem;">
+                Official AGMARKNET Data | Powered by Gnani AI
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/assistant.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/farming_card.js') }}"></script>
+    {% block extra_scripts %}{% endblock %}
+
+</body>
+</html>

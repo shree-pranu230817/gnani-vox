@@ -1,0 +1,228 @@
+{% extends 'base.html' %}
+
+{% block title %}GNANI VOX – Break Language Barriers. Empower Every Farmer.{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-banner">
+    <div class="container hero-container-grid">
+        <div class="hero-text-content">
+            <div class="hero-badge-pill" data-i18n="hero_badge">
+                <span>⚡</span> Powered by Gnani AI Voice Infrastructure
+            </div>
+            <h1 class="hero-title" data-i18n="hero_title">
+                Break Language Barriers.<br>
+                <span class="highlight-green">Empower Every Farmer.</span>
+            </h1>
+            <p class="hero-subtitle" data-i18n="hero_subtitle">
+                Experience intelligent voice translation for everyone and practical AI-powered agricultural guidance for farmers, all in one platform.
+            </p>
+            <div class="hero-action-buttons">
+                <a href="{{ url_for('voxconnect_screen') }}" class="btn-hero-primary">
+                    <span data-i18n="hero_btn_voxconnect">Open VoxConnect</span> ➔
+                </a>
+                <a href="{{ url_for('krishiguide_screen') }}" class="btn-hero-secondary">
+                    <span data-i18n="hero_btn_krishi">Ask KrishiGuide AI</span> 🌿
+                </a>
+            </div>
+            <div class="hero-trust-strip">
+                <div class="trust-item">
+                    <span class="trust-icon">🎙️</span>
+                    <span>Gnani Prisma STT</span>
+                </div>
+                <div class="trust-item">
+                    <span class="trust-icon">🔊</span>
+                    <span>Gnani Timbre TTS</span>
+                </div>
+                <div class="trust-item">
+                    <span class="trust-icon">🧠</span>
+                    <span>Gemini AI Grounding</span>
+                </div>
+                <div class="trust-item">
+                    <span class="trust-icon">🇮🇳</span>
+                    <span>10+ Indian Languages</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="hero-visual-card">
+            <div class="hero-img-wrapper">
+                <img src="{{ url_for('static', filename='images/gnani_vox_banner.jpg') }}" alt="GNANI VOX Banner" class="hero-banner-image">
+            </div>
+            <div class="hero-card-caption">
+                <strong>GNANI VOX</strong> – "One Voice. Many Languages. No Barriers."
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- PREFERRED WEBSITE LANGUAGE QUICK CHOOSER -->
+<section class="lang-preference-bar">
+    <div class="container lang-preference-inner">
+        <span class="lang-pref-label">
+            <span class="lang-pref-icon">🌐</span>
+            <strong data-i18n="pref_lang_title">Choose Preferred Website Language:</strong>
+        </span>
+        <div class="lang-pills-row" id="homeLangPills">
+            <button type="button" class="lang-pill-btn active font-en" data-lang="en">🌐 English</button>
+            <button type="button" class="lang-pill-btn font-kn" data-lang="kn">🌿 ಕನ್ನಡ (Kannada)</button>
+            <button type="button" class="lang-pill-btn font-te" data-lang="te">🌱 తెలుగు (Telugu)</button>
+            <button type="button" class="lang-pill-btn font-ta" data-lang="ta">🌾 தமிழ் (Tamil)</button>
+            <button type="button" class="lang-pill-btn font-hi" data-lang="hi">🇮🇳 हिन्दी (Hindi)</button>
+            <button type="button" class="lang-pill-btn font-ml" data-lang="ml">🌴 മലയാളം (Malayalam)</button>
+            <button type="button" class="lang-pill-btn font-bn" data-lang="bn">🌾 বাংলা (Bengali)</button>
+            <button type="button" class="lang-pill-btn font-mr" data-lang="mr">🌱 मराठी (Marathi)</button>
+            <button type="button" class="lang-pill-btn font-gu" data-lang="gu">🦁 ગુજરાતી (Gujarati)</button>
+        </div>
+    </div>
+</section>
+
+<!-- MAIN FEATURES SECTION -->
+<section class="services-section">
+    <div class="container">
+        <div class="section-heading-row">
+            <span class="section-badge" data-i18n="services_badge">CORE PLATFORM SERVICES</span>
+            <h2 class="section-title" data-i18n="services_heading">Two Flagship Voice AI Features</h2>
+            <p class="section-subtext" data-i18n="services_subtext">
+                Universal voice communication for everyday life, paired with dedicated intelligence for agricultural guidance.
+            </p>
+        </div>
+
+        <div class="services-grid two-features-grid">
+            <!-- CARD 1: VOXCONNECT – UNIVERSAL VOICE TRANSLATOR -->
+            <div class="service-card feature-card-vox">
+                <div class="card-content-wrap">
+                    <div class="card-badge-row">
+                        <span class="service-badge badge-blue" data-i18n="s1_badge">FEATURE 1</span>
+                        <span class="feature-tag">Universal for Everyone</span>
+                    </div>
+                    <div class="feature-header-group">
+                        <div class="service-icon icon-blue">🌐</div>
+                        <div>
+                            <h3 class="service-title" data-i18n="s1_title">VOXCONNECT</h3>
+                            <span class="service-title-sub" data-i18n="s1_sub">Universal Voice Translator</span>
+                        </div>
+                    </div>
+                    <p class="service-tagline-quote" data-i18n="s1_quote">"Speak in Your Language. Understand Any Language."</p>
+                    <p class="service-desc" data-i18n="s1_desc">
+                        Communicate with anyone, in any supported language. Designed for students, travelers, workers, farmers, shopkeepers, and anyone overcoming language barriers.
+                    </p>
+                    <ul class="service-features-list">
+                        <li><span>✔</span> <strong data-i18n="s1_f1_t">Voice &amp; Text Translation:</strong> <span data-i18n="s1_f1_d">Speak or type in your language, hear and read immediate translation.</span></li>
+                        <li><span>✔</span> <strong data-i18n="s1_f2_t">Dual Conversation Mode:</strong> <span data-i18n="s1_f2_d">Person A &amp; Person B live bilateral dialogue with distinct controls.</span></li>
+                        <li><span>✔</span> <strong data-i18n="s1_f3_t">Powered by Gnani AI:</strong> <span data-i18n="s1_f3_d">Gnani Prisma STT voice recognition &amp; Gnani Timbre natural TTS audio.</span></li>
+                        <li><span>✔</span> <strong data-i18n="s1_f4_t">10 Indian Languages:</strong> <span data-i18n="s1_f4_d">Kannada, Telugu, Tamil, Hindi, Malayalam, Bengali, Marathi, Gujarati &amp; English.</span></li>
+                    </ul>
+                </div>
+                <div class="card-footer-action">
+                    <a href="{{ url_for('voxconnect_screen') }}" class="service-btn btn-blue">
+                        <span data-i18n="s1_btn">Start Translating</span>
+                        <span>➔</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- CARD 2: KRISHIGUIDE AI – FARMER GUIDANCE ASSISTANT -->
+            <div class="service-card feature-card-krishi">
+                <div class="card-content-wrap">
+                    <div class="card-badge-row">
+                        <span class="service-badge badge-green" data-i18n="s2_badge">FEATURE 2</span>
+                        <span class="feature-tag">Dedicated for Farmers</span>
+                    </div>
+                    <div class="feature-header-group">
+                        <div class="service-icon icon-green">🌿</div>
+                        <div>
+                            <h3 class="service-title" data-i18n="s2_title">KRISHIGUIDE AI</h3>
+                            <span class="service-title-sub" data-i18n="s2_sub">Farmer Guidance Assistant</span>
+                        </div>
+                    </div>
+                    <p class="service-tagline-quote" data-i18n="s2_quote">"Your Intelligent Agricultural Guidance Assistant."</p>
+                    <p class="service-desc" data-i18n="s2_desc">
+                        Get understandable, AI-powered guidance for your agricultural questions. Voice interaction with continuous memory and responsible agronomic recommendations.
+                    </p>
+                    <ul class="service-features-list">
+                        <li><span>✔</span> <strong data-i18n="s2_f1_t">Voice &amp; Text Agricultural Q&amp;A:</strong> <span data-i18n="s2_f1_d">Ask about crops, seeds, fertilizer, irrigation, pest &amp; disease control.</span></li>
+                        <li><span>✔</span> <strong data-i18n="s2_f2_t">Continuous Conversation Memory:</strong> <span data-i18n="s2_f2_d">Persistent SQLite storage remembers crop, stage, and previous questions.</span></li>
+                        <li><span>✔</span> <strong data-i18n="s2_f3_t">Crop Leaf Photo Diagnosis:</strong> <span data-i18n="s2_f3_d">Upload crop images to identify visual disease symptoms and safe next steps.</span></li>
+                        <li><span>✔</span> <strong data-i18n="s2_f4_t">Responsible Agronomy:</strong> <span data-i18n="s2_f4_d">Zero invented chemical dosages; grounded in ICAR, KVK &amp; university science.</span></li>
+                    </ul>
+                </div>
+                <div class="card-footer-action">
+                    <a href="{{ url_for('krishiguide_screen') }}" class="service-btn btn-green">
+                        <span data-i18n="s2_btn">Ask KrishiGuide</span>
+                        <span>➔</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- HOW GNANI VOX WORKS -->
+<section class="how-it-works-section">
+    <div class="container">
+        <div class="section-heading-row text-center">
+            <span class="section-badge" data-i18n="how_badge">END-TO-END WORKFLOW</span>
+            <h2 class="section-title" data-i18n="how_title">How GNANI VOX Works</h2>
+            <p class="section-subtext" data-i18n="how_subtext">
+                Seamless pipeline connecting user voice, state-of-the-art speech intelligence, and natural spoken delivery.
+            </p>
+        </div>
+
+        <div class="steps-grid">
+            <div class="step-card">
+                <div class="step-number">1</div>
+                <div class="step-icon">🎙️</div>
+                <h4 data-i18n="step1_title">User Speaks</h4>
+                <p data-i18n="step1_desc">Speak naturally in your preferred language using our one-tap microphone or hands-free mode.</p>
+            </div>
+            <div class="step-card">
+                <div class="step-number">2</div>
+                <div class="step-icon">⚡</div>
+                <h4 data-i18n="step2_title">Gnani Prisma STT</h4>
+                <p data-i18n="step2_desc">High-speed regional speech recognition transcribes Indian dialects accurately into text.</p>
+            </div>
+            <div class="step-card">
+                <div class="step-number">3</div>
+                <div class="step-icon">🧠</div>
+                <h4 data-i18n="step3_title">AI Reasoning Engine</h4>
+                <p data-i18n="step3_desc">Translates speech across languages or analyzes agricultural inquiries with ICAR grounding.</p>
+            </div>
+            <div class="step-card">
+                <div class="step-number">4</div>
+                <div class="step-icon">🔊</div>
+                <h4 data-i18n="step4_title">Gnani Timbre TTS</h4>
+                <p data-i18n="step4_desc">Synthesizes smooth, natural neural speech in the target language for immediate listening.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- PLATFORM CAPABILITIES HIGHLIGHTS -->
+<section class="highlights-section">
+    <div class="container">
+        <div class="highlights-grid">
+            <div class="highlight-item">
+                <div class="hi-icon">🌐</div>
+                <h4 data-i18n="hi1_title">Multilingual Communication</h4>
+                <p data-i18n="hi1_desc">Eliminates linguistic boundaries across Indian states and communities with bidirectional speech translation.</p>
+            </div>
+            <div class="highlight-item">
+                <div class="hi-icon">🎙️</div>
+                <h4 data-i18n="hi2_title">Voice-Powered Accessibility</h4>
+                <p data-i18n="hi2_desc">Intuitive voice controls make technology effortless for individuals with limited literacy or technical experience.</p>
+            </div>
+            <div class="highlight-item">
+                <div class="hi-icon">🌾</div>
+                <h4 data-i18n="hi3_title">AI Agricultural Guidance</h4>
+                <p data-i18n="hi3_desc">Practical, verified agronomic information protecting crops, soil health, and farmer livelihoods.</p>
+            </div>
+            <div class="highlight-item">
+                <div class="hi-icon">⚡</div>
+                <h4 data-i18n="hi4_title">Gnani AI Speech Technology</h4>
+                <p data-i18n="hi4_desc">Robust enterprise-grade voice models tuned specifically for Indian regional accents and acoustic environments.</p>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

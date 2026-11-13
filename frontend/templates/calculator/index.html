@@ -1,0 +1,217 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ t('profit_calculator') }} – {{ t('app_name') }}{% endblock %}
+
+{% block content %}
+<div class="dashboard-header">
+    <div class="dashboard-title">
+        <h2>🧮 Smart Crop Profit & Expense Calculator</h2>
+        <p>Scientific farm budget planning, expected crop yield revenue, and per-acre profit calculation</p>
+    </div>
+</div>
+
+<div class="dashboard-grid-2">
+    <!-- Input Form Column -->
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">1. Farm Area, Yield & Expenses</h3>
+        </div>
+        <div class="card-body">
+            <form method="POST" action="{{ url_for('calculator.save_calculation') }}" id="profitCalcForm">
+                <!-- Crop & Land Info -->
+                <div class="form-row">
+                    <div class="form-group" style="flex: 2;">
+                        <label class="form-label">Crop Name *</label>
+                        <input type="text" name="crop_name" id="crop_name" class="form-control" value="Ponni Paddy" required>
+                    </div>
+                    <div class="form-group" style="flex: 1;">
+                        <label class="form-label">Plan Title</label>
+                        <input type="text" name="calculation_title" class="form-control" value="Kharif 2026 Plan">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Land Area *</label>
+                        <input type="number" step="0.1" name="land_area" id="land_area" class="form-control" value="2.0" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Land Unit</label>
+                        <select name="land_unit" id="land_unit" class="form-control">
+                            <option value="Acre" selected>Acre</option>
+                            <option value="Hectare">Hectare</option>
+                            <option value="Bigha">Bigha</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Expected Total Yield *</label>
+                        <input type="number" step="0.5" name="expected_yield" id="expected_yield" class="form-control" value="50.0" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Yield Unit</label>
+                        <select name="yield_unit" id="yield_unit" class="form-control">
+                            <option value="Quintal" selected>Quintal</option>
+                            <option value="Tonne">Metric Tonne</option>
+                            <option value="Kg">Kilogram (kg)</option>
+                            <option value="Bag">Bags</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Selling Price (₹ per unit) *</label>
+                        <input type="number" step="10" name="expected_price" id="expected_price" class="form-control" value="2650" required>
+                    </div>
+                </div>
+
+                <!-- Farming Expenses Breakdown -->
+                <h4 style="font-size: 1rem; color: var(--primary-900); margin: 24px 0 12px; border-bottom: 1px solid var(--border-light); padding-bottom: 6px;">
+                    💰 Farming Expenses Breakdown (₹)
+                </h4>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Seeds & Nursery Cost (₹)</label>
+                        <input type="number" step="50" name="seeds_cost" id="seeds_cost" class="form-control" value="4500">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Fertilizer & Manure Cost (₹)</label>
+                        <input type="number" step="50" name="fertilizer_cost" id="fertilizer_cost" class="form-control" value="9200">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Pesticides & Bio-control (₹)</label>
+                        <input type="number" step="50" name="pesticide_cost" id="pesticide_cost" class="form-control" value="3400">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Labour & Machinery Rent (₹)</label>
+                        <input type="number" step="50" name="labour_cost" id="labour_cost" class="form-control" value="16000">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Irrigation & Power Fuel (₹)</label>
+                        <input type="number" step="50" name="irrigation_cost" id="irrigation_cost" class="form-control" value="3800">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Transport & Bagging (₹)</label>
+                        <input type="number" step="50" name="transport_cost" id="transport_cost" class="form-control" value="4000">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Other Miscellaneous Expenses (₹)</label>
+                    <input type="number" step="50" name="other_expenses" id="other_expenses" class="form-control" value="2000">
+                </div>
+
+                {% if current_user %}
+                <button type="submit" class="btn btn-primary btn-lg" style="width: 100%; margin-top: 10px;">
+                    💾 Save Calculation to My Farm History
+                </button>
+                {% else %}
+                <div style="background: #f8fafc; padding: 12px; border-radius: var(--radius-md); text-align: center; margin-top: 10px; font-size: 0.85rem;">
+                    <a href="{{ url_for('auth.login') }}" style="font-weight: 700;">Login</a> to save and track your seasonal farm calculation history!
+                </div>
+                {% endif %}
+            </form>
+        </div>
+    </div>
+
+    <!-- Live Calculation Results Column -->
+    <div>
+        <div class="card" style="margin-bottom: 24px; border: 2px solid var(--primary-600); background: #ffffff;">
+            <div class="card-header" style="background: var(--primary-50);">
+                <h3 class="card-title" style="color: var(--primary-900);">2. Live Profit Estimation</h3>
+                <span class="badge badge-active">Instant Calculation</span>
+            </div>
+            <div class="card-body">
+                <div style="margin-bottom: 18px; padding-bottom: 16px; border-bottom: 1px solid var(--border-light);">
+                    <div style="font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase;">Expected Net Profit</div>
+                    <div id="resProfit" style="font-size: 2.6rem; font-weight: 800; color: #166534; line-height: 1.1; margin: 4px 0;">
+                        ₹89,600.00
+                    </div>
+                    <div style="font-size: 0.88rem; color: var(--text-secondary);">
+                        Estimated Profit per Acre: <strong id="resProfitPerAcre" style="color: var(--primary-900);">₹44,800.00</strong>
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 20px;">
+                    <div style="background: #f8fafc; padding: 12px; border-radius: var(--radius-sm);">
+                        <span style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;">Total Expenses</span>
+                        <div id="resTotalExpenses" style="font-size: 1.3rem; font-weight: 800; color: #dc2626;">₹42,900.00</div>
+                    </div>
+                    <div style="background: #f8fafc; padding: 12px; border-radius: var(--radius-sm);">
+                        <span style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;">Gross Revenue</span>
+                        <div id="resRevenue" style="font-size: 1.3rem; font-weight: 800; color: #166534;">₹132,500.00</div>
+                    </div>
+                    <div style="background: #f8fafc; padding: 12px; border-radius: var(--radius-sm);">
+                        <span style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;">Return on Inv. (ROI)</span>
+                        <div id="resRoi" style="font-size: 1.3rem; font-weight: 800; color: var(--primary-800);">208.9%</div>
+                    </div>
+                    <div style="background: #f8fafc; padding: 12px; border-radius: var(--radius-sm);">
+                        <span style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;">Break-Even Price</span>
+                        <div id="resBreakEven" style="font-size: 1.3rem; font-weight: 800; color: #475569;">₹858.00</div>
+                        <span style="font-size: 0.7rem; color: var(--text-muted);">per unit to cover cost</span>
+                    </div>
+                </div>
+
+                <!-- Donut Chart -->
+                <h4 style="font-size: 0.92rem; font-weight: 700; color: var(--primary-900); margin-bottom: 8px;">
+                    Expense Distribution Breakdown
+                </h4>
+                <div style="position: relative; height: 210px; width: 100%;">
+                    <canvas id="expenseChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Saved Calculation History -->
+        {% if saved_calculations %}
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title" style="font-size: 1rem;">Past Saved Calculation History</h3>
+            </div>
+            <div class="card-body" style="padding: 0;">
+                <div class="table-responsive">
+                    <table class="custom-table" style="font-size: 0.82rem;">
+                        <thead>
+                            <tr>
+                                <th>Plan / Crop</th>
+                                <th>Net Profit</th>
+                                <th>Per Acre</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for sc in saved_calculations %}
+                            <tr>
+                                <td>
+                                    <strong>{{ sc.calculation_title or sc.crop_name }}</strong>
+                                    <div style="color: var(--text-muted);">{{ sc.created_at[:10] }}</div>
+                                </td>
+                                <td style="font-weight: 700; color: #166534;">₹{{ "{:,.2f}".format(sc.expected_profit) }}</td>
+                                <td style="font-weight: 600;">₹{{ "{:,.2f}".format(sc.profit_per_acre) }}</td>
+                                <td>
+                                    <form method="POST" action="{{ url_for('calculator.delete_calculation', calc_id=sc.id) }}" onsubmit="return confirm('Delete this record?');">
+                                        <button type="submit" class="btn btn-outline btn-sm" style="color: #dc2626; border-color: #fca5a5; padding: 2px 6px;">
+                                            ✕
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<script src="{{ url_for('static', filename='js/calculator.js') }}"></script>
+{% endblock %}

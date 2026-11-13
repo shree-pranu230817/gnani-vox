@@ -1,0 +1,112 @@
+{% extends 'base.html' %}
+
+{% block title %}Daily Reports & Analytics – Admin – {{ t('app_name') }}{% endblock %}
+
+{% block content %}
+<div class="dashboard-header">
+    <div class="dashboard-title">
+        <h2>📊 Platform Analytics & Daily Reports</h2>
+        <p>Marketplace volume, state harvest distributions, and commodity trends</p>
+    </div>
+    <a href="{{ url_for('admin.dashboard') }}" class="btn btn-outline">
+        &larr; Back to Admin Center
+    </a>
+</div>
+
+<div class="dashboard-grid-2">
+    <!-- Top Listed Crops -->
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">Top Crops by Active Listings</h3>
+        </div>
+        <div class="card-body" style="padding: 0;">
+            <div class="table-responsive">
+                <table class="custom-table">
+                    <thead>
+                        <tr>
+                            <th>Crop Name</th>
+                            <th>Total Listings</th>
+                            <th>Available Volume</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for tc in top_crops %}
+                        <tr>
+                            <td><strong>{{ tc.name }}</strong></td>
+                            <td>{{ tc.listings }} listings</td>
+                            <td style="font-weight: 700; color: var(--primary-800);">{{ tc.total_volume }} {{ tc.stock_unit }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- State Distribution -->
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">Top States by Farmer Supply</h3>
+        </div>
+        <div class="card-body" style="padding: 0;">
+            <div class="table-responsive">
+                <table class="custom-table">
+                    <thead>
+                        <tr>
+                            <th>State</th>
+                            <th>Active Crop Listings</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for sd in state_distribution %}
+                        <tr>
+                            <td><strong>{{ sd.state }}</strong></td>
+                            <td style="font-weight: 700; color: var(--primary-700);">{{ sd.count }} crops</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Monthly Revenue Summary -->
+<div class="card" style="margin-top: 24px;">
+    <div class="card-header">
+        <h3 class="card-title">Monthly Marketplace Volume (INR)</h3>
+    </div>
+    <div class="card-body" style="padding: 0;">
+        <div class="table-responsive">
+            <table class="custom-table">
+                <thead>
+                    <tr>
+                        <th>Month</th>
+                        <th>Orders Count</th>
+                        <th>Total Gross Volume</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for ms in monthly_sales %}
+                    <tr>
+                        <td><strong>{{ ms.month }}</strong></td>
+                        <td>{{ ms.order_count }} orders</td>
+                        <td style="font-size: 1.1rem; font-weight: 800; color: var(--primary-800);">
+                            ₹{{ "{:,.2f}".format(ms.revenue) }}
+                        </td>
+                        <td><span class="badge badge-active">Audited</span></td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="4" style="text-align: center; padding: 20px; color: var(--text-muted);">
+                            No historical monthly data recorded yet.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

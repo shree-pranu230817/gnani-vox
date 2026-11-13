@@ -1,0 +1,140 @@
+{% extends 'base.html' %}
+
+{% block title %}Checkout – {{ product.name }}{% endblock %}
+
+{% block content %}
+<div style="max-width: 800px; margin: 20px auto;">
+    <div style="margin-bottom: 20px;">
+        <a href="{{ url_for('marketplace.product_detail', product_id=product.id) }}" style="color: var(--primary-700); font-weight: 600;">
+            &larr; Back to {{ product.name }}
+        </a>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h2 class="card-title">📦 Order Checkout</h2>
+            <span class="badge badge-active">Direct Farm Purchase</span>
+        </div>
+
+        <div class="card-body">
+            <form method="POST" action="{{ url_for('buyer.checkout', product_id=product.id) }}" id="checkoutForm">
+                <!-- Product Review Row -->
+                <div style="display: flex; gap: 16px; padding-bottom: 20px; border-bottom: 1px solid var(--border-light); margin-bottom: 20px;">
+                    <img src="{{ product.image_url }}" alt="{{ product.name }}" style="width: 90px; height: 90px; border-radius: var(--radius-md); object-fit: cover;" onerror="this.src='https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?auto=format&fit=crop&w=200&q=80'">
+                    <div style="flex: 1;">
+                        <h3 style="font-size: 1.2rem; color: var(--primary-900);">{{ product.name }}</h3>
+                        <div style="font-size: 0.85rem; color: var(--text-muted); margin: 4px 0;">
+                            Sold by: <strong>{{ product.farmer_name }}</strong> ({{ product.farmer_mobile }})
+                        </div>
+                        <div style="font-size: 1.1rem; color: var(--primary-800); font-weight: 700;">
+                            ₹{{ product.price_per_unit }} per {{ product.stock_unit }}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quantity Selection -->
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Order Quantity (in {{ product.stock_unit }}) *</label>
+                        <input type="number" step="0.5" min="0.5" max="{{ product.stock_quantity }}" id="orderQty" name="quantity" class="form-control" value="1" required>
+                        <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 4px;">
+                            Maximum available: {{ product.stock_quantity }} {{ product.stock_unit }}
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Contact Phone for Delivery *</label>
+                        <input type="tel" name="contact_phone" class="form-control" value="{{ buyer.mobile }}" required>
+                    </div>
+                </div>
+
+                <!-- Delivery Address -->
+                <div class="form-group">
+                    <label class="form-label">Full Delivery Address *</label>
+                    <textarea name="delivery_address" class="form-control" rows="2" required placeholder="House/Shop no, street, landmark, city, state, pincode">{{ buyer_prof.delivery_address or '' }}</textarea>
+                </div>
+
+                <!-- Discount Coupon -->
+                <div class="form-group" style="background: #f8fafc; padding: 14px; border-radius: var(--radius-md);">
+                    <label class="form-label">Have a Discount Coupon?</label>
+                    <div style="display: flex; gap: 8px;">
+                        <input type="text" name="coupon_code" id="couponInput" class="form-control" placeholder="Enter coupon code (e.g. FARMER10)">
+                    </div>
+                    <div style="display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap;">
+                        <span style="font-size: 0.78rem; color: var(--text-muted);">Available Coupons:</span>
+                        {% for c in coupons %}
+                        <button type="button" onclick="document.getElementById('couponInput').value='{{ c.code }}'" class="btn btn-outline btn-sm" style="font-size: 0.72rem; padding: 2px 8px;">
+                            🏷️ {{ c.code }} ({% if c.discount_type == 'percent' %}{{ c.discount_value }}% off{% else %}₹{{ c.discount_value }} off{% endif %})
+                        </button>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- Payment Method -->
+                <div class="form-group">
+                    <label class="form-label">Select Payment Method</label>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                        <label style="border: 2px solid var(--primary-600); background: var(--primary-50); padding: 12px; border-radius: var(--radius-md); cursor: pointer; display: flex; align-items: center; gap: 8px;">
+                            <input type="radio" name="payment_method" value="Cash on Delivery" checked>
+                            <div>
+                                <div style="font-weight: 700; color: var(--primary-900);">💵 Cash on Delivery</div>
+                                <div style="font-size: 0.75rem; color: var(--text-secondary);">Pay upon harvest receipt</div>
+                            </div>
+                        </label>
+                        <label style="border: 2px solid var(--border-color); padding: 12px; border-radius: var(--radius-md); cursor: pointer; display: flex; align-items: center; gap: 8px;">
+                            <input type="radio" name="payment_method" value="Direct UPI Transfer">
+                            <div>
+                                <div style="font-weight: 700; color: var(--primary-900);">📲 Direct UPI Transfer</div>
+                                <div style="font-size: 0.75rem; color: var(--text-secondary);">Simulated instant payout</div>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Notes -->
+                <div class="form-group">
+                    <label class="form-label">Special Delivery / Packaging Notes</label>
+                    <input type="text" name="notes" class="form-control" placeholder="e.g. Please pack in 50kg jute bags">
+                </div>
+
+                <!-- Price Summary Box -->
+                <div style="background: #f1f8e9; border: 1px solid #c5e1a5; padding: 16px; border-radius: var(--radius-md); margin: 20px 0;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 6px; font-size: 0.95rem;">
+                        <span>Subtotal:</span>
+                        <strong id="subtotalDisplay">₹{{ product.price_per_unit }}</strong>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 6px; font-size: 0.95rem; color: #15803d;">
+                        <span>Direct Farm Discount:</span>
+                        <span>- ₹0.00</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; border-top: 1px solid #c5e1a5; padding-top: 8px; font-size: 1.25rem;">
+                        <span style="font-weight: 800; color: var(--primary-900);">Estimated Total:</span>
+                        <span style="font-weight: 800; color: var(--primary-800);" id="totalDisplay">₹{{ product.price_per_unit }}</span>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-lg" style="width: 100%;">
+                    Confirm Order (+20 Reward Points) &rarr;
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const unitPrice = {{ product.price_per_unit }};
+    const qtyInput = document.getElementById('orderQty');
+    const subtotalEl = document.getElementById('subtotalDisplay');
+    const totalEl = document.getElementById('totalDisplay');
+
+    function updatePrice() {
+        const qty = parseFloat(qtyInput.value) || 0;
+        const total = (qty * unitPrice).toFixed(2);
+        subtotalEl.textContent = '₹' + parseFloat(total).toLocaleString('en-IN');
+        totalEl.textContent = '₹' + parseFloat(total).toLocaleString('en-IN');
+    }
+
+    qtyInput.addEventListener('input', updatePrice);
+});
+</script>
+{% endblock %}

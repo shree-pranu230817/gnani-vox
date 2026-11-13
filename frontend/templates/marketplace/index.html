@@ -1,0 +1,111 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ t('marketplace') }} – Fresh Farm Harvests{% endblock %}
+
+{% block content %}
+<div class="dashboard-header">
+    <div class="dashboard-title">
+        <h2>🛒 {{ t('marketplace') }}</h2>
+        <p>Buy fresh crops directly from verified Indian farmers with zero middleman fee</p>
+    </div>
+    {% if current_user and current_user.role == 'farmer' %}
+    <a href="{{ url_for('farmer.add_product') }}" class="btn btn-primary">
+        ➕ {{ t('add_product') }}
+    </a>
+    {% endif %}
+</div>
+
+<!-- Search & Filter Bar -->
+<div class="card" style="padding: 16px; margin-bottom: 24px;">
+    <form method="GET" action="{{ url_for('marketplace.index') }}" style="display: flex; flex-wrap: wrap; gap: 12px; align-items: center;">
+        <!-- Search Query -->
+        <div style="flex: 2; min-width: 240px;">
+            <input type="text" name="q" class="form-control" placeholder="Search crops (e.g. Paddy, Onions, Wheat, Ragi)..." value="{{ search_query }}">
+        </div>
+
+        <!-- State Filter -->
+        <div style="flex: 1; min-width: 160px;">
+            <select name="state" class="form-control" onchange="this.form.submit()">
+                <option value="All">{{ t('all_states') }}</option>
+                {% for st in states %}
+                <option value="{{ st }}" {% if current_state == st %}selected{% endif %}>{{ st }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <!-- Sort By -->
+        <div style="flex: 1; min-width: 160px;">
+            <select name="sort" class="form-control" onchange="this.form.submit()">
+                <option value="newest" {% if current_sort == 'newest' %}selected{% endif %}>Newest Harvest</option>
+                <option value="price_low" {% if current_sort == 'price_low' %}selected{% endif %}>Price: Low to High</option>
+                <option value="price_high" {% if current_sort == 'price_high' %}selected{% endif %}>Price: High to Low</option>
+            </select>
+        </div>
+
+        <button type="submit" class="btn btn-primary" style="padding: 10px 20px;">Search</button>
+        {% if search_query or current_state or current_category %}
+        <a href="{{ url_for('marketplace.index') }}" class="btn btn-outline" style="padding: 10px 14px;">Reset</a>
+        {% endif %}
+    </form>
+</div>
+
+<!-- Category Filter Pills -->
+<div style="display: flex; gap: 8px; overflow-x: auto; padding-bottom: 12px; margin-bottom: 24px;">
+    <a href="{{ url_for('marketplace.index') }}" class="btn {% if not current_category %}btn-primary{% else %}btn-outline{% endif %} btn-sm" style="border-radius: var(--radius-full); white-space: nowrap;">
+        All Crops
+    </a>
+    {% for cat in categories %}
+    <a href="{{ url_for('marketplace.index', category=cat.id, state=current_state, sort=current_sort) }}" 
+       class="btn {% if current_category == cat.id|string %}btn-primary{% else %}btn-outline{% endif %} btn-sm" 
+       style="border-radius: var(--radius-full); white-space: nowrap;">
+        {{ cat.name }}
+    </a>
+    {% endfor %}
+</div>
+
+<!-- Products Grid -->
+{% if products %}
+<div class="product-grid">
+    {% for prod in products %}
+    <div class="product-card">
+        <div class="product-image-box">
+            <img src="{{ prod.image_url }}" alt="{{ prod.name }}" class="product-img" onerror="this.src='https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?auto=format&fit=crop&w=600&q=80'">
+            <span class="product-category-tag">{{ prod.category_name }}</span>
+        </div>
+        <div class="product-content">
+            <h3 class="product-title">{{ prod.name }}</h3>
+            <div class="product-location">
+                <span>📍</span>
+                <span>{{ prod.harvest_location }}, {{ prod.district }} ({{ prod.state }})</span>
+            </div>
+            
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; font-size: 0.82rem;">
+                <span style="color: var(--text-secondary);">👨‍🌾 {{ prod.farmer_name }}</span>
+                <span style="color: var(--accent-amber); font-weight: 700;">★ {{ "%.1f"|format(prod.avg_rating) }} ({{ prod.review_count }})</span>
+            </div>
+
+            <div class="product-pricing">
+                <div>
+                    <div class="price-main">₹{{ prod.price_per_unit }}</div>
+                    <div class="price-unit">per {{ prod.stock_unit }}</div>
+                </div>
+                <div style="text-align: right;">
+                    <div class="stock-tag" style="margin-bottom: 6px;">{{ prod.stock_quantity }} {{ prod.stock_unit }} left</div>
+                    <a href="{{ url_for('marketplace.product_detail', product_id=prod.id) }}" class="btn btn-primary btn-sm">
+                        {{ t('order_now') }}
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="card" style="padding: 50px 20px; text-align: center;">
+    <div style="font-size: 3rem; margin-bottom: 12px;">🌾</div>
+    <h3 style="font-size: 1.3rem; color: var(--primary-900); font-weight: 700;">No crops found</h3>
+    <p style="color: var(--text-muted); margin-bottom: 20px;">Try adjusting your search terms or filters.</p>
+    <a href="{{ url_for('marketplace.index') }}" class="btn btn-outline">Clear Filters</a>
+</div>
+{% endif %}
+{% endblock %}
