@@ -5,6 +5,7 @@ Safely loads credentials from .env without exposing keys.
 """
 
 import os
+import shutil
 from dotenv import load_dotenv
 
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
@@ -17,7 +18,23 @@ if os.path.exists(env_path):
 
 class Config:
     SECRET_KEY = os.environ.get('SECRET_KEY', 'gnani-vox-voice-ai-platform-2026')
-    UPLOAD_FOLDER = os.path.join(BASE_DIR, 'uploads')
+
+    # Detect Vercel / serverless environment with read-only filesystem
+    IS_VERCEL = bool(os.environ.get('VERCEL') or os.environ.get('AWS_LAMBDA_FUNCTION_NAME'))
+
+    if IS_VERCEL:
+        UPLOAD_FOLDER = '/tmp/uploads'
+        DB_PATH = '/tmp/uzhavar_conversations.db'
+        src_db = os.path.join(BASE_DIR, 'uzhavar_conversations.db')
+        if os.path.exists(src_db) and not os.path.exists(DB_PATH):
+            try:
+                shutil.copy2(src_db, DB_PATH)
+            except Exception:
+                pass
+    else:
+        UPLOAD_FOLDER = os.path.join(BASE_DIR, 'uploads')
+        DB_PATH = os.path.join(BASE_DIR, 'uzhavar_conversations.db')
+
     MAX_CONTENT_LENGTH = 32 * 1024 * 1024  # 32 MB max audio
     ALLOWED_AUDIO_EXTENSIONS = {'wav', 'mp3', 'ogg', 'webm', 'm4a', 'flac', 'aac'}
     DEFAULT_LANGUAGE = 'kn'  # Kannada is default

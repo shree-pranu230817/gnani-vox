@@ -17,6 +17,11 @@ if sys.platform.startswith('win'):
     except Exception:
         pass
 
+# Ensure project root is in sys.path
+BASE_DIR = os.path.abspath(os.path.dirname(__file__))
+if BASE_DIR not in sys.path:
+    sys.path.insert(0, BASE_DIR)
+
 # Force pure-Python SQLAlchemy mode to comply with Windows security policies
 os.environ['DISABLE_SQLALCHEMY_CEXT'] = '1'
 
@@ -42,10 +47,16 @@ def create_app():
     # Initialize SQLite Database & SQLAlchemy ORM
     db.init_app(app)
     with app.app_context():
-        db.create_all()
+        try:
+            db.create_all()
+        except Exception as e:
+            app.logger.warning(f"Database initialization notice: {e}")
 
     # Ensure uploads directory exists
-    os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+    try:
+        os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+    except Exception as e:
+        app.logger.warning(f"Uploads directory notice: {e}")
 
     # Register Blueprints
     app.register_blueprint(translation_bp)

@@ -9,10 +9,10 @@ import sys
 import uuid
 from datetime import datetime
 
-# Load pure-Python vendor SQLAlchemy to comply with Windows security policies
+# Ensure vendor directory is available as fallback for local pure-Python mode
 vendor_dir = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'vendor')
 if os.path.exists(vendor_dir) and vendor_dir not in sys.path:
-    sys.path.insert(0, vendor_dir)
+    sys.path.append(vendor_dir)
 
 os.environ['DISABLE_SQLALCHEMY_CEXT'] = '1'
 
