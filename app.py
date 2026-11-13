@@ -160,32 +160,90 @@ def create_app():
             'overall_status': 'Ready' if gemini_stat.get('status') == 'Connected' else 'Partial'
         })
 
+    # ==========================================================
+    # DEBUG ENDPOINT — logs all Vercel WSGI environ headers
+    # ==========================================================
+    @app.route('/api/debug/env', methods=['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'])
+    def debug_env():
+        import json as _json
+        env_snapshot = {
+            k: str(v) for k, v in request.environ.items()
+            if isinstance(v, (str, int, float, bool, type(None)))
+            and not k.startswith(('wsgi.', 'werkzeug.'))
+        }
+        return jsonify({
+            'method': request.method,
+            'path': request.path,
+            'content_type': request.content_type,
+            'form_keys': list(request.form.keys()),
+            'json_body': request.get_json(silent=True),
+            'files': list(request.files.keys()),
+            'environ_headers': env_snapshot
+        }), 200
+
     # Error Handlers
     @app.errorhandler(404)
     def page_not_found(e):
         return render_template('index.html'), 404
 
+    @app.errorhandler(405)
+    def method_not_allowed(e):
+        """Return JSON for API routes, HTML for page routes."""
+        if request.path.startswith('/api/'):
+            return jsonify({
+                'error': 'Method Not Allowed',
+                'method': request.method,
+                'path': request.path,
+                'allowed': list(e.valid_methods or [])
+            }), 405
+        return render_template('index.html'), 405
+
     @app.errorhandler(500)
     def internal_error(e):
-        return jsonify({'error': 'Internal server error'}), 500
+        return jsonify({'error': 'Internal server error', 'detail': str(e)}), 500
 
     return app
 
 class VercelPathFixerMiddleware:
+    """
+    Middleware to fix PATH_INFO and REQUEST_METHOD on Vercel serverless.
+    Vercel's Python adapter routes all requests through /api/index, so we
+    restore the original path and HTTP method from forwarded headers.
+    """
     def __init__(self, wsgi_app):
         self.wsgi_app = wsgi_app
 
     def __call__(self, environ, start_response):
+        # 1. Restore original URL path from Vercel forwarded headers
         original_path = (
             environ.get('HTTP_X_FORWARDED_URI') or
             environ.get('HTTP_X_MATCHED_PATH') or
-            environ.get('HTTP_X_NOW_ROUTE')
+            environ.get('HTTP_X_NOW_ROUTE') or
+            environ.get('HTTP_X_VERCEL_REWRITE_PATH') or
+            environ.get('HTTP_X_ORIGINAL_URI')
         )
         if original_path:
+            # Strip query string from path
             path_only = original_path.split('?')[0]
+            # Also restore QUERY_STRING if present in the forwarded URI
+            if '?' in original_path:
+                environ['QUERY_STRING'] = original_path.split('?', 1)[1]
             environ['PATH_INFO'] = path_only
         elif environ.get('PATH_INFO') in ('/api/index', '/api', '/api/index.py', ''):
             environ['PATH_INFO'] = '/'
+
+        # 2. Restore original HTTP method — Vercel sometimes passes method override headers
+        # Also check if body has _method field for method override
+        orig_method = (
+            environ.get('HTTP_X_HTTP_METHOD_OVERRIDE') or
+            environ.get('HTTP_X_METHOD_OVERRIDE') or
+            environ.get('HTTP_X_ORIGINAL_METHOD') or
+            environ.get('HTTP_ACCESS_CONTROL_REQUEST_METHOD')
+        )
+        # Only override GET/HEAD with the found method (never downgrade POST)
+        current_method = environ.get('REQUEST_METHOD', 'GET').upper()
+        if orig_method and current_method in ('GET', 'HEAD'):
+            environ['REQUEST_METHOD'] = orig_method.upper()
 
         return self.wsgi_app(environ, start_response)
 
